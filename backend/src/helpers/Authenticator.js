@@ -15,7 +15,7 @@ export const generateToken = async credentials => {
     name,
     uuid: v4(),
   };
-  const token = jwt.sign(session, 'lilChatter', {
+  const token = jwt.sign(session, 'mateMessage', {
     expiresIn: 60 * 60 * 24 * 7 * 30
   });
   return token;
@@ -23,7 +23,7 @@ export const generateToken = async credentials => {
 
 export const validateToken = async token => {
   try {
-    const user = await jwt.verify(token, 'lilChatter');
+    const user = await jwt.verify(token, 'mateMessage');
     return user;
   } catch (e) {
     console.log('ERROR AT VALIDATE TOKEN', e); // eslint-disable-line

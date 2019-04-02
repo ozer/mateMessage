@@ -1,63 +1,49 @@
-import React, { Component } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  AsyncStorage
-} from 'react-native';
-import { compose, withApollo, Mutation, graphql } from 'react-apollo';
-import gql from 'graphql-tag';
-import { SignInMutation } from './src/mutations/Auth';
-import { Person } from './src/queries/Auth';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ * @flow
+ */
 
-class App extends Component {
+import React, {Component} from 'react';
+import {Platform, StyleSheet, Text, View} from 'react-native';
+
+const instructions = Platform.select({
+  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
+  android:
+    'Double tap R on your keyboard to reload,\n' +
+    'Shake or press menu button for dev menu',
+});
+
+type Props = {};
+export default class App extends Component<Props> {
   render() {
     return (
-      <View style={{ backgroundColor: 'white', flex: 1, }}>
-        <Mutation
-          onError={err => console.log('err at sign in ', err.networkError)}
-          mutation={SignInMutation}
-          update={async (cache, { data: { signIn } }) => {
-            console.log('signIn response -> ', signIn);
-            if (signIn && signIn.state) {
-              const { user } = signIn;
-              const abc = cache.readQuery({ query: Person });
-              const { email, id, jwt, name, username } = user;
-              await AsyncStorage.setItem('token', jwt);
-              cache.writeQuery({
-                query: Person,
-                data: {
-                  id,
-                  username,
-                  email,
-                  name,
-                  jwt
-                }
-              });
-            }
-          }}
-        >
-          {(signIn, { data, loading, error }) => (
-            <View style={{ flex: 1, marginTop: 100 }}>
-              <TouchableOpacity
-                onPress={() =>
-                  signIn({
-                    variables: { username: 'cr1', password: '123456' }
-                  })
-                }
-              >
-                <Text>Send Sign In Mutation</Text>
-              </TouchableOpacity>
-              {loading ? <Text>Loading...</Text> : null}
-              {error ? <Text> {error.toString()}</Text> : null}
-            </View>
-          )}
-        </Mutation>
+      <View style={styles.container}>
+        <Text style={styles.welcome}>Welcome to React Native!</Text>
+        <Text style={styles.instructions}>To get started, edit App.js</Text>
+        <Text style={styles.instructions}>{instructions}</Text>
       </View>
     );
   }
 }
 
-export default App;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#333333',
+    marginBottom: 5,
+  },
+});

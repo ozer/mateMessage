@@ -20,7 +20,7 @@ mongoose.Promise = global.Promise;
 const initializeServer = async () => {
 
   mongoose.connect(
-    'mongodb://localhost:27017/mateMessage',
+    'mongodb://localhost:27017/newMateMessage',
     { useNewUrlParser: true }
   );
 
