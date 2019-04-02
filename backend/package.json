@@ -1,0 +1,38 @@
+{
+  "name": "lilchatter-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel-node src/index.js",
+    "start:localhost": "nodemon src/index.js --exec babel-node"
+  },
+  "author": "Ozer Cevikaslan",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-graphql": "^0.7.1",
+    "graphql": "^14.1.1",
+    "jsonwebtoken": "^8.5.0",
+    "mongoose": "^5.4.14",
+    "subscriptions-transport-ws": "^0.9.15",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-node8": "^1.2.0",
+    "nodemon": "^1.18.10"
+  },
+  "babel": {
+    "presets": [
+      "node8"
+    ]
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}
