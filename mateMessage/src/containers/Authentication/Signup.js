@@ -43,9 +43,6 @@ const SignUp = () => {
       }
     });
 
-  console.log('username -> ', username);
-  console.log('email -> ', email);
-
   return (
     <View style={{ backgroundColor: 'white', flex: 1 }}>
       <ScrollView style={{ flex: 1 }}>
@@ -72,7 +69,7 @@ const SignUp = () => {
             update={async (cache, { data: { signUp } }) => {
               console.log('signUn -> ', signUp);
               if (signUp && signUp.state) {
-                goAuth();
+                goToSignIn();
               }
             }}
           >
