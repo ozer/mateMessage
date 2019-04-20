@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity ,View, Text, Image } from 'react-native';
 import { Avatar } from 'react-native-elements';
+import { getInitials } from '../../helpers/mates';
 
 const ContactCard = (props) => {
   const { person, onPress } = props;
@@ -19,7 +20,7 @@ const ContactCard = (props) => {
       <Avatar
         rounded
         size="medium"
-        title="TS"
+        title={getInitials(person)}
         source={avatarUrl ? {uri: avatarUrl} : null}
       />
       <View style={{ marginLeft: 8, marginRight: 8, justifyContent: 'center'}}>

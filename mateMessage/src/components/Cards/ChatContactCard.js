@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Avatar } from 'react-native-elements';
+import { getInitials } from '../../helpers/mates';
 
 const ChatContactCard = props => {
   const { onPress, lastMessage, otherRecipient } = props;
@@ -19,7 +20,7 @@ const ChatContactCard = props => {
       <Avatar
         rounded
         size="medium"
-        title="TS"
+        title={getInitials(otherRecipient)}
         source={
           otherRecipient && otherRecipient.avatarUrl
             ? { uri: otherRecipient.avatarUrl }
