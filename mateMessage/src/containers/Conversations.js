@@ -237,24 +237,6 @@ class Conversations extends Component {
             }
           }}
         />
-        <Subscription
-          subscription={ConversationCreated}
-          onSubscriptionData={options => {
-            console.log('Conversation Created ! => ', options);
-            // if (options && options.subscriptionData && options.subscriptionData.data && options.subscriptionData.data.messageCreated) {
-            //   const { subscriptionData } = options;
-            //   const { data } = subscriptionData;
-            //   const { messageCreated } = data;
-            //   const { conversation } = messageCreated;
-            //   const feed = options.client.readQuery({query: ConversationsQuery});
-            //   const conversationIndex = feed.feed.findIndex(obj => obj.id === conversation.id);
-            //   const foundConversation = feed.feed[conversationIndex];
-            //   foundConversation.messages.push({ content: messageCreated.content, id: messageCreated.id });
-            //   console.log('foundConversation -> ', foundConversation);
-            //   options.client.writeQuery({ query: ConversationsQuery, data: feed });
-            // }
-          }}
-        />
       </View>
     );
   }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, TouchableHighlight, AsyncStorage } from 'react-native';
 import { withApollo } from 'react-apollo';
 import { Navigation } from 'react-native-navigation';
-import { persistor } from '../../index';
+import {persistor, wsLink} from '../../index';
 import { goAuth } from '../../navigation';
 
 class Settings extends Component {
@@ -12,6 +12,8 @@ class Settings extends Component {
     const { props } = this;
     const { client } = props;
     console.log('client -> ', client);
+    // Close socket connection.
+    wsLink.subscriptionClient.close();
     await persistor.pause();
     await persistor.purge();
     await client.resetStore();
