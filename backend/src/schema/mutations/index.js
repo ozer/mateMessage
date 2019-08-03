@@ -161,22 +161,6 @@ const mutations = new GraphQLObjectType({
                     };
                   });
               });
-              // return Conversation.create({
-              //   recipients: [_id, receiverId]
-              // }).then(async newConversation => {
-              //   console.log('New conversation is created! ->', newConversation);
-              //   const aa = await newConversation.populate(['recipients']);
-              //   console.log('aaaa -> ', aa);
-              //   publishConversation({
-              //     conversationId: newConversation._id,
-              //     receiverId,
-              //     recipients: newConversation.recipients
-              //   });
-              //   return {
-              //     state: true,
-              //     conversationData: newConversation
-              //   };
-              // });
             })
             .catch(e => {
               console.log('ERROR AT FIND CONVERSATION', e);

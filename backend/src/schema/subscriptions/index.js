@@ -40,7 +40,7 @@ const subscriptions = new GraphQLObjectType({
     messageCreated: {
       type: MessageType,
       subscribe: (params, {}, context) => {
-        console.log('sadsadas');
+        console.log('messageCreated Subscribed');
         if (context && context.user) {
           const { user } = context;
           const { _id } = user;
