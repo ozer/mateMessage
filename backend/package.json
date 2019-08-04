@@ -7,7 +7,7 @@
     "start": "babel-node src/index.js",
     "start:dev": "NODE_ENV=dev nodemon src/index.js --exec babel-node",
     "start:prod": "NODE_ENV=prod pm2 start src/pm2Cluster.js -i 0",
-    "test": "NODE_ENV=test mocha --require babel-register test/*.spec.js"
+    "test": "NODE_ENV=test mocha --require babel-register test/*.spec.js --exit"
   },
   "author": "Ozer Cevikaslan",
   "license": "ISC",

@@ -25,9 +25,8 @@ describe('mateMessage API TEST', () => {
     console.log('Dropped db');
   });
 
-  after(async () => {
-    console.log('killServer');
-    await killServer();
+  after('Close Mongo Connection and close the server.', done => {
+    killServer().then(() => done());
   });
 
   it('The server initialize successfully and returns true.', async () => {
@@ -87,7 +86,7 @@ describe('mateMessage API TEST', () => {
     it(`${
       Leo.name
     } should be able to open a secure websocket connection to the server.`, async function() {
-      this.timeout(10000);
+      this.timeout(5000);
       let connected = false;
 
       const link = new WebSocketLink({
@@ -123,32 +122,7 @@ describe('mateMessage API TEST', () => {
       const client = () => apollo;
 
       // Connect to WebSocket Server.
-      link.subscriptionClient.connect();
-
-      await delay(1000);
-
-      console.log('Delay is over');
-      client()
-        .subscribe({
-          query: gql`
-            subscription MessageCreated {
-              messageCreated {
-                id
-                content
-                conversation {
-                  id
-                }
-                sender {
-                  id
-                }
-              }
-            }
-          `
-        })
-        .subscribe({
-          next: data => console.log(data),
-          error: err => console.log('error: ', err)
-        });
+      await link.subscriptionClient.connect();
     });
   });
 });

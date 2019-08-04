@@ -5,7 +5,7 @@ import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { signIn, signUp, isTokenAuthenticated } from './api/auth';
-import { initializeServer } from '../src/server';
+import { initializeServer, killServer } from '../src/server';
 import { dropDatabase } from './utils/db';
 import gql from 'graphql-tag';
 import { Leo, Ozer } from './utils/data';
@@ -76,8 +76,12 @@ describe('Messaging Test', () => {
     await delay(1000);
   });
 
-  it(`Leo and Ozer subscribed to messageCreated successfully and their state equals to ready. \n
-  Ozer creates a conversation with Leo and it has a uuid. \n
+  after('Close Mongo Connection and close the server.', done => {
+    killServer().then(() => done());
+  });
+
+  it(`Leo and Ozer subscribed to messageCreated successfully and their state equals to ready.
+  Ozer creates a conversation with Leo and it has a uuid.
   Ozer sends a message which is 'Hi Leo' and Leo answers back him with 'Hi Ozer'.`, async () => {
     const leoMessageSubscription = await leoClient()
       .subscribe({
@@ -213,7 +217,5 @@ describe('Messaging Test', () => {
           conversationId: conversation.data.createConversation.conversationData.id
         }
       });
-
-    console.log('we are here!');
   });
 });
