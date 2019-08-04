@@ -48,7 +48,7 @@ const ConversationInput = props => {
 
   const { onChangeText, messageText, conversationId, otherRecipient, personId } = props;
 
-  console.log('otherRecipient from conv input ', otherRecipient);
+  // console.log('otherRecipient -> ', otherRecipient);
 
   return (
     <Mutation

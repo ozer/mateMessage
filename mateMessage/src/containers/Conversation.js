@@ -151,12 +151,10 @@ class Conversation extends React.Component {
               if (error) {
                 console.log('Error ->', error);
               }
-              console.log('conversation** Data -> ', data);
               const conversation =
                 data && data.feed
                   ? data.feed.find(c => c.id === props.conversationId)
                   : {};
-              console.log('conversation!', conversation);
               const { messages } = conversation;
               return (
                 <View style={{ flex: 1, backgroundColor: '#f1f1f4' }}>

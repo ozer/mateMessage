@@ -3,9 +3,7 @@ import { View, Text } from 'react-native';
 
 const ConversationBubble = props => {
   const { message, me } = props;
-  console.log('message -> ', message);
   const { content, sender, loading } = message;
-  // console.log('bubble props -> ', props);
   if (me.id && sender.id) {
     return (
       <View
@@ -18,7 +16,7 @@ const ConversationBubble = props => {
       >
         {loading ? (
           <View>
-            <Text>Yukleniyor</Text>
+            <Text>Loading</Text>
           </View>
         ) : null}
         <View

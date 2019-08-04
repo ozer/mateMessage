@@ -69,7 +69,7 @@ class Conversations extends Component {
       text: '',
       messages: [],
       personId: '',
-      refreshIndicator: false,
+      refreshIndicator: false
     };
   }
 
@@ -91,7 +91,6 @@ class Conversations extends Component {
 
   navigationButtonPressed({ buttonId }) {
     console.log('buttonId -> ', buttonId);
-    alert('sadadas');
   }
 
   onEndEditing = () => {
@@ -119,7 +118,7 @@ class Conversations extends Component {
   };
 
   onPress = item => () => {
-    console.log('Person touched! -> ', item);
+    console.log('Mate touched! -> ', item);
     Navigation.push('ConversationTabStack', {
       component: {
         name: 'navigation.playground.Conversation',
@@ -159,7 +158,6 @@ class Conversations extends Component {
             }
             console.log('Conversations Data -> ', data);
             if (data && data.feed && data.feed.length) {
-              console.log('HEYEHEYHEY');
               return (
                 <FlatList
                   refreshing={refreshIndicator}
@@ -172,29 +170,47 @@ class Conversations extends Component {
                   data={data.feed}
                   keyExtractor={item => item.id}
                   renderItem={({ item }) => {
-                    const { recipients, messages } = item;
-                    const otherRecipient = recipients.find(
-                      recipient => recipient.id !== personId
-                    );
-                    return (
-                      <ChatContactCard
-                        key={item.id}
-                        otherRecipient={otherRecipient}
-                        lastMessage={
-                          messages && messages.length
-                            ? messages[messages.length-1].content
-                            : ''
-                        }
-                        onPress={this.onPress(item)}
-                      />
-                    );
+                    console.log('item -> ', item);
+                    if (
+                      item.recipients &&
+                      item.recipients.length &&
+                      item.messages &&
+                      item.messages.length
+                    ) {
+                      const { recipients, messages } = item;
+                      const otherRecipient = recipients.find(
+                        recipient => recipient.id !== personId
+                      );
+                      return (
+                        <ChatContactCard
+                          key={item.id}
+                          otherRecipient={otherRecipient}
+                          lastMessage={
+                            messages && messages.length
+                              ? messages[messages.length - 1].content
+                              : ''
+                          }
+                          onPress={this.onPress(item)}
+                        />
+                      );
+                    }
                   }}
                 />
               );
             }
             return (
-              <View style={{ flex: 1, justifyContent: 'center', flexDirection: 'column'}}>
-                <Text style={{ textAlign: 'center', fontSize: 28, color: 'black' }}>Find a Mate to Start Chat!</Text>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  flexDirection: 'column'
+                }}
+              >
+                <Text
+                  style={{ textAlign: 'center', fontSize: 28, color: 'black' }}
+                >
+                  Find a Mate to Start Chat!
+                </Text>
               </View>
             );
           }}

@@ -39,18 +39,19 @@ console.log('mateMessage');
 let token = '';
 
 export const getToken = () => token;
-export const setToken = newToken => token = newToken;
+export const setToken = newToken => (token = newToken);
 
 export const wsLink = new WebSocketLink({
   uri: 'ws://localhost:4000/graphql',
   options: {
     connectionCallback: () => {
       console.log('Connection callback!');
+      subscribeChannel();
     },
     connectionParams: () => ({
       authToken: token
     })
-  },
+  }
 });
 
 const authLink = setContext(async (_, { headers }) => {
@@ -68,11 +69,7 @@ const authLink = setContext(async (_, { headers }) => {
 
 const link = split(
   ({ query }) => {
-    console.log('Query -> ', query);
     const { kind, operation, name } = getMainDefinition(query);
-    console.log('Name -> ', name);
-    console.log('Kind -> ', kind);
-    console.log('Operation -> ', operation);
     return kind === 'OperationDefinition' && operation === 'mutation';
   },
   authLink.concat(httpLink),
@@ -85,13 +82,20 @@ const mApolloClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',
-      errorPolicy: 'ignore',
+      errorPolicy: 'ignore'
     },
     query: {
-      errorPolicy: 'all',
-    },
-  },
+      errorPolicy: 'all'
+    }
+  }
 });
+
+const subscribeChannel = () => {
+  mApolloClient.subscribe({
+    query: ConversationCreated,
+    variables: { id: '' }
+  });
+};
 
 const withProvider = (Component, client = mApolloClient) => {
   return props => {
@@ -128,7 +132,9 @@ Navigation.registerComponent(
   () => SearchResult
 );
 
-Navigation.registerComponent('navigation.playground.Settings', () => withProvider(Settings));
+Navigation.registerComponent('navigation.playground.Settings', () =>
+  withProvider(Settings)
+);
 
 const startApp = async () => {
   Navigation.events().registerAppLaunchedListener(async () => {
@@ -187,10 +193,6 @@ const startApp = async () => {
           setToken(user.jwt);
           await wsLink.subscriptionClient.connect();
           setTimeout(() => {
-            mApolloClient.subscribe({
-              query: ConversationCreated,
-              variables: { id: '' },
-            });
             return goHome();
           }, 2000);
         } else {
@@ -202,7 +204,7 @@ const startApp = async () => {
               name: '',
               username: '',
               email: '',
-              jwt: '',
+              jwt: ''
             }
           });
           return goAuth();
@@ -216,7 +218,7 @@ const startApp = async () => {
             name: '',
             username: '',
             email: '',
-            jwt: '',
+            jwt: ''
           }
         });
         return goAuth();
@@ -230,12 +232,12 @@ const startApp = async () => {
           name: '',
           username: '',
           email: '',
-          jwt: '',
+          jwt: ''
         }
       });
       return goAuth();
     }
-  } catch(e) {
+  } catch (e) {
     console.log('ERROR AT INITIAL', e);
     return goAuth();
   }

@@ -42,7 +42,6 @@ export const goSignUp = () =>
     root: {
       stack: {
         options: {
-          
           animations: {
             setRoot: {
               alpha: {
@@ -69,9 +68,9 @@ export const goSignUp = () =>
             }
           }
         ]
-      },
+      }
     }
-  })
+  });
 
 export const goHome = () =>
   Navigation.setRoot({
@@ -108,8 +107,8 @@ export const goHome = () =>
                           text: 'Mates'
                         },
                         largeTitle: {
-                          visible: true,
-                        },
+                          visible: true
+                        }
                       },
                       bottomTab: {
                         fontSize: 12,
@@ -138,8 +137,8 @@ export const goHome = () =>
                           text: 'Chats'
                         },
                         largeTitle: {
-                          visible: true,
-                        },
+                          visible: true
+                        }
                       },
                       bottomTab: {
                         fontSize: 12,
@@ -165,8 +164,8 @@ export const goHome = () =>
                           text: 'Settings'
                         },
                         largeTitle: {
-                          visible: true,
-                        },
+                          visible: true
+                        }
                       },
                       bottomTab: {
                         fontSize: 12,
