@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/ozercevikaslan/mateMessage/tree/master.svg?style=svg)](https://circleci.com/gh/ozercevikaslan/mateMessage/tree/master)
+
 # mateMessage 😎
 ## Simple messaging application built with React Native, Apollo-GraphQL, Node, Express and MongoDB.
 
