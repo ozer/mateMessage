@@ -5,25 +5,10 @@ import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { signIn, signUp, isTokenAuthenticated } from './api/auth';
-import { initializeServer } from '../src/server';
+import { initializeServer, killServer } from '../src/server';
 import { dropDatabase } from './utils/db';
 import gql from 'graphql-tag';
-
-const Leo = {
-  username: 'leo',
-  password: 'leo123456',
-  email: 'leo@gmail.com',
-  name: 'Leo Volkan Arslan'
-};
-
-const Ozer = {
-  username: 'ozer',
-  password: 'ozer123456',
-  email: 'ozer@gmail.com',
-  name: 'Ozer Cevikaslan'
-};
-
-const cache = new InMemoryCache();
+import { Leo, Ozer } from './utils/data';
 
 const delay = s =>
   new Promise(resolve => {
@@ -36,8 +21,13 @@ const delay = s =>
 describe('mateMessage API TEST', () => {
   before(async () => {
     console.log('First thing first, Cleaning the database...');
-    await dropDatabase({ dbName: 'testMateMessage' });
+    await dropDatabase();
     console.log('Dropped db');
+  });
+
+  after(async () => {
+    console.log('killServer');
+    await killServer();
   });
 
   it('The server initialize successfully and returns true.', async () => {
@@ -115,6 +105,7 @@ describe('mateMessage API TEST', () => {
         }
       });
 
+      const cache = new InMemoryCache();
       const apollo = new ApolloClient({
         link,
         cache,
@@ -129,13 +120,13 @@ describe('mateMessage API TEST', () => {
         }
       });
 
+      const client = () => apollo;
+
       // Connect to WebSocket Server.
       link.subscriptionClient.connect();
 
-      const client = () => apollo;
-
       await delay(1000);
-      
+
       console.log('Delay is over');
       client()
         .subscribe({

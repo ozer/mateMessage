@@ -17,6 +17,8 @@ import { validateToken } from './helpers/Authenticator';
 const PORT = 4000;
 mongoose.Promise = global.Promise;
 
+let httpServer;
+
 export const initializeServer = async () => {
   mongoose.connect('mongodb://localhost:27017/testMateMessage', {
     useNewUrlParser: true
@@ -92,13 +94,14 @@ export const initializeServer = async () => {
     }
   });
 
-  const httpServer = http.createServer(app);
+  httpServer = http.createServer(app);
   httpServer.listen = promisify(httpServer.listen);
 
   apolloServer.applyMiddleware({ app });
   apolloServer.installSubscriptionHandlers(httpServer);
 
   await httpServer.listen(PORT);
+
   console.log(
     `🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`
   );
@@ -109,3 +112,11 @@ export const initializeServer = async () => {
   );
   return true;
 };
+
+export const killServer = async () => {
+  if (httpServer) {
+    // Closing database connection.
+    await mongoose.disconnect();
+    await httpServer.close();
+  }
+} 

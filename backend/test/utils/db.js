@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
-export const dropDatabase = async ({ dbName = '' }) => {
-  mongoose.connect(`mongodb://localhost:27017/${dbName}`, {
+export const dropDatabase = async () => {
+  mongoose.connect(`mongodb://localhost:27017/testMateMessage`, {
     useNewUrlParser: true
   });
 

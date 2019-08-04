@@ -185,7 +185,7 @@ const mutations = new GraphQLObjectType({
       resolve(parentValue, { content, conversationId }, context) {
         console.log('sendMessage');
         console.log('content -> ', content);
-        if (context && context.state && context.user) {
+        if (context && context.user) {
           return Conversation.findById(conversationId).then(conversation => {
             const { _id } = context.user;
             const message = new Message({
