@@ -20,7 +20,8 @@ mongoose.Promise = global.Promise;
 let httpServer;
 
 export const initializeServer = async () => {
-  mongoose.connect('mongodb://localhost:27017/testMateMessage', {
+  console.log('ENVIRONMENT -> ', process.env.NODE_ENV);
+  mongoose.connect(`mongodb://localhost:27017/${process.env.NODE_ENV}-MateMessage`, {
     useNewUrlParser: true
   });
 
