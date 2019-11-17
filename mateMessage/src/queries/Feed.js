@@ -3,47 +3,37 @@ import gql from 'graphql-tag';
 export const Users = gql`
   query People {
     people {
-      username
-      id
-      name
-      email
+      ...PeopleFragment
     }
+  }
+
+  fragment PeopleFragment on User {
+    id
+    username
+    name
+    email
   }
 `;
 
-export const ConversationsQuery = gql`
-  query ($id: String){
-    feed(id: $id){
-      id
-      recipients {
-        id
-        name
-      }
-      messages {
-        id
-        content
-        sender {
-          id
-        }
-      }
-    }
-  }
-`;
-
-export const FindConversation = gql`
+export const Feed = gql`
   query FindConversation($id: String) {
     feed(id: $id) {
       id
-      recipients {
+      ...FeedFragment
+    }
+  }
+
+  fragment FeedFragment on Conversation {
+    id
+    messages {
+      id
+      content
+    }
+    recipients {
+      id
+      recipient {
         id
         name
-      }
-      messages {
-        id
-        content
-        sender {
-          id
-        }
       }
     }
   }

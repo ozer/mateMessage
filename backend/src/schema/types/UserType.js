@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const User = mongoose.model('User');
 
 const UserType = new GraphQLObjectType({
-  name: 'UserType',
+  name: 'User',
   fields: () => ({
     name: {
       type: GraphQLString

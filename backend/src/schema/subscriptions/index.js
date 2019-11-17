@@ -4,16 +4,27 @@ import MessageType from '../types/MessageType';
 import ConversationType from '../types/ConversationType';
 const pubSub = new PubSub();
 
-export const publishMessage = params => {
-  console.log('Params in publishMessage -> ', params);
-  const { receiverId, content, conversationId, senderId, messageId } = params;
-  const subscriptionPath = `${receiverId}-message`;
-  pubSub.publish(subscriptionPath, {
+export const sendMessageToRecipients = ({ recipients, conversationId, senderId, messageId, content }) => {
+  console.log('sendMessageToRecipients -> ', recipients);
+  const recs = recipients.map(r => {
+    return {
+      id: r.id, recipient: { id: r.recipient.id, name: r.recipient.name }
+    }
+  })
+  for (const recipient of recipients) {
+    publishMessage({ content, conversationId, senderId, messageId, recipientId: recipient.recipient.id, recipients: recs });
+  }
+};
+
+export const publishMessage = ({ content, conversationId, senderId, messageId, recipientId, recipients }) => {
+  console.log('Params in publishMessage -> ', content, conversationId, senderId, messageId, recipientId);
+  return pubSub.publish(recipientId, {
     messageCreated: {
       id: messageId,
       content,
       conversation: {
         id: conversationId,
+        recipients
       },
       sender: {
         id: senderId,
@@ -26,7 +37,7 @@ export const publishConversation = params => {
   console.log('Params in publishConversation -> ', params);
   const { receiverId, conversationId, recipients } = params;
   const subscriptionPath = `${receiverId}-conversation`;
-  pubSub.publish(subscriptionPath, {
+  return pubSub.publish(subscriptionPath, {
     conversationCreated: {
       id: conversationId,
       recipients
@@ -39,13 +50,13 @@ const subscriptions = new GraphQLObjectType({
   fields: {
     messageCreated: {
       type: MessageType,
-      subscribe: (params, {}, context) => {
+      subscribe: (params, { }, context) => {
         console.log('messageCreated Subscribed');
+        console.log('new Message');
         if (context && context.user) {
           const { user } = context;
-          const { _id } = user;
-          console.log('Subscribing to messageCreated -> ', _id);
-          const subscriptionPath = `${_id}-message`;
+          console.log('Subscribing to messageCreated -> ', user.id);
+          const subscriptionPath = user.id;
           return pubSub.asyncIterator([subscriptionPath]);
         }
         return null;
@@ -53,7 +64,7 @@ const subscriptions = new GraphQLObjectType({
     },
     conversationCreated: {
       type: ConversationType,
-      subscribe: (params, {}, context) => {
+      subscribe: (params, { }, context) => {
         if (context && context.user) {
           const { user } = context;
           const { _id } = user;
@@ -63,8 +74,8 @@ const subscriptions = new GraphQLObjectType({
         }
         return null;
       }
-    }
-  }
+    },
+  },
 });
 
 export default subscriptions;

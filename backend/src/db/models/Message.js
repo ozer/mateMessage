@@ -1,22 +1,16 @@
 import { Schema, model } from "mongoose";
-import User from './User';
 
-const MessageSchema = new Schema(
+export const MessageSchema = new Schema(
     {
       content: String,
-      conversationId: {
-        type: Schema.Types.ObjectId,
-        ref: 'conversation',
-      },
       sender: {
         type: Schema.Types.ObjectId,
         ref: 'User',
       },
       created_at: { type: Date, default: new Date() }
     },
-    { collection: "message" }
 );
 
-const Message = model("Message", MessageSchema, "Message");
+MessageSchema.index({ content: 1, sender: 1 });
 
-export default MessageSchema;
+export default model("Message", MessageSchema, "Message");

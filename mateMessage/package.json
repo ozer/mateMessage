@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
+    "ios": "react-native run-ios --simulator='iPhone 11'",
     "test": "jest"
   },
   "dependencies": {
+    "@apollo/react-hooks": "3.1.1",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-cache-persist": "^0.1.1",
-    "apollo-client": "^2.5.1",
+    "apollo-client": "^2.6.4",
     "apollo-link": "^1.2.11",
     "apollo-link-context": "^1.0.17",
     "apollo-link-http": "^1.5.14",
@@ -17,11 +19,11 @@
     "apollo-utilities": "^1.2.1",
     "graphql": "^14.2.1",
     "graphql-tag": "^2.10.1",
-    "react": "16.8.3",
-    "react-apollo": "^2.5.3",
-    "react-native": "0.59.3",
+    "react": "^16.10.1",
+    "react-apollo": "^3.1.1",
+    "react-native": "^0.61.1",
     "react-native-elements": "^1.1.0",
-    "react-native-navigation": "^2.16.0",
+    "react-native-navigation": "2.26.5",
     "react-native-vector-icons": "^6.4.2",
     "subscriptions-transport-ws": "^0.9.16"
   },
@@ -30,8 +32,8 @@
     "@babel/runtime": "^7.4.2",
     "babel-jest": "^24.6.0",
     "jest": "^24.6.0",
-    "metro-react-native-babel-preset": "^0.53.1",
-    "react-test-renderer": "16.8.3"
+    "metro-react-native-babel-preset": "^0.56.0",
+    "react-test-renderer": "^16.10.1"
   },
   "jest": {
     "preset": "react-native"

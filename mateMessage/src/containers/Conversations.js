@@ -73,7 +73,7 @@ class Conversations extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const { props } = this;
     const { client } = props;
     try {
@@ -173,9 +173,7 @@ class Conversations extends Component {
                     console.log('item -> ', item);
                     if (
                       item.recipients &&
-                      item.recipients.length &&
-                      item.messages &&
-                      item.messages.length
+                      item.recipients.length
                     ) {
                       const { recipients, messages } = item;
                       const otherRecipient = recipients.find(

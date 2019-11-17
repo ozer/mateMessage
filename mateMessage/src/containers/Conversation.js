@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, PureComponent } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ const renderFooter = () => (
   <View style={{ height: 10, flex: 1, flexDirection: 'row' }} />
 );
 
-class Conversation extends React.Component {
+class Conversation extends PureComponent {
   flatListRef = null;
 
   constructor(props) {
@@ -36,7 +36,7 @@ class Conversation extends React.Component {
     this.keyboardHeight = new Animated.Value(0);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     try {
       this.keyboardWillShowSub = Keyboard.addListener(
         'keyboardWillShow',
@@ -49,7 +49,10 @@ class Conversation extends React.Component {
       const { props } = this;
       const { conversationId, client } = props;
       const Conv = client.readQuery({
-        query: FindConversation
+        query: FindConversation,
+        variables: {
+          id: conversationId
+        }
       });
       const Me = client.readQuery({ query: Person });
       if (Conv && Conv.feed && Conv.feed.length) {
@@ -140,51 +143,48 @@ class Conversation extends React.Component {
         {error ? (
           <View />
         ) : (
-          <Query
-            query={FindConversation}
-            variables={{ id: props.conversationId }}
-          >
-            {({ loading, error, data }) => {
-              if (loading) {
-                console.log('Loading!');
-              }
-              if (error) {
-                console.log('Error ->', error);
-              }
-              const conversation =
-                data && data.feed
-                  ? data.feed.find(c => c.id === props.conversationId)
-                  : {};
-              const { messages } = conversation;
-              return (
-                <View style={{ flex: 1, backgroundColor: '#f1f1f4' }}>
-                  {messages && messages.length ? (
-                    <FlatList
-                      initialNumToRender={10}
-                      onScroll={handleScroll}
-                      ref={ref => (this.flatListRef = ref)}
-                      ListEmptyComponent={this.ConversationZeroState}
-                      ListFooterComponent={renderFooter()}
-                      onContentSizeChange={event => {
-                        // console.log('onContentSizeChange -> ', event);
-                        this.flatListRef.scrollToEnd({ animated: true });
-                      }}
-                      onLayout={event => {
-                        // console.log('onLayout -> ', event);
-                        this.flatListRef.scrollToEnd({ animated: true });
-                      }}
-                      data={messages}
-                      renderItem={({ item }) => (
-                        <ConversationBubble message={item} me={Me} />
-                      )}
-                      keyExtractor={this.keyExtractor}
-                    />
-                  ) : null}
-                </View>
-              );
-            }}
-          </Query>
-        )}
+            <Query
+              fetchPolicy={'cache-and-network'}
+              query={FindConversation}
+              variables={{ id: props.conversationId }}
+            >
+              {({ loading, error, data }) => {
+                if (loading) {
+                  console.log('Loading!');
+                }
+                if (error) {
+                  console.log('Error ->', error);
+                }
+                console.log('data -> ', data);
+                const conversation = data.feed[0];
+                const { messages } = conversation;
+                return (
+                  <View style={{ flex: 1, backgroundColor: '#f1f1f4' }}>
+                    {messages && messages.length ? (
+                      <FlatList
+                        initialNumToRender={10}
+                        onScroll={handleScroll}
+                        ref={ref => (this.flatListRef = ref)}
+                        ListEmptyComponent={this.ConversationZeroState}
+                        ListFooterComponent={renderFooter()}
+                        onContentSizeChange={event => {
+                          this.flatListRef.scrollToEnd({ animated: true });
+                        }}
+                        onLayout={event => {
+                          this.flatListRef.scrollToEnd({ animated: true });
+                        }}
+                        data={messages}
+                        renderItem={({ item }) => (
+                          <ConversationBubble message={item} me={Me} />
+                        )}
+                        keyExtractor={this.keyExtractor}
+                      />
+                    ) : null}
+                  </View>
+                );
+              }}
+            </Query>
+          )}
         <ConversationInput
           otherRecipient={otherRecipient}
           onChangeText={onMessageTextChange}

@@ -1,41 +1,25 @@
 import { Navigation } from 'react-native-navigation';
 
-export const goAuth = () =>
-  Navigation.setRoot({
-    root: {
-      stack: {
-        id: 'Auth.Stack',
+export const goAuth = (componentId) => {
+  return Navigation.setStackRoot(componentId, [
+    {
+      component: {
+        name: 'Auth.SignIn',
+        id: 'Auth.SignIn',
+        passProps: {
+          text: 'Root screen'
+        },
         options: {
           animations: {
-            setRoot: {
-              alpha: {
-                from: 0,
-                to: 1,
-                duration: 2000,
-                interpolation: 'accelerate'
-              }
-            }
-          },
-          topBar: {
-            visible: false,
-            drawBehind: false,
-            height: 0
-          },
-          layout: {
-            orientation: ['portrait']
-          }
-        },
-        children: [
-          {
-            component: {
-              id: 'Auth.SignIn',
-              name: 'Auth.SignIn'
+            setStackRoot: {
+              enabled: true
             }
           }
-        ]
+        }
       }
     }
-  });
+  ]);
+}
 
 export const goSignUp = () =>
   Navigation.setRoot({
@@ -101,15 +85,27 @@ export const goHome = () =>
                     id: 'People',
                     options: {
                       topBar: {
-                        visible: true,
-                        drawBehind: false,
+                        searchBar: true,
+                        searchBarHiddenWhenScrolling: true,
+                        hideNavBarOnFocusSearchBar: true,
+                        searchBarPlaceholder: 'Search',
                         title: {
-                          text: 'Mates'
+                          text: 'Mates',
                         },
                         largeTitle: {
                           visible: true
                         }
                       },
+                      // topBar: {
+                      //   visible: true,
+                      //   drawBehind: false,
+                      //   title: {
+                      //     text: 'Mates'
+                      //   },
+                      //   largeTitle: {
+                      //     visible: true
+                      //   }
+                      // },
                       bottomTab: {
                         fontSize: 12,
                         text: 'Mates',

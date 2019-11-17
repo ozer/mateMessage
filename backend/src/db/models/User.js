@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const UserSchema = new Schema(
+export const UserSchema = new Schema(
   {
     name: String,
     email: String,
@@ -10,9 +10,8 @@ const UserSchema = new Schema(
     jwt: String,
     created_at: { type: Date, default: new Date() }
   },
-  { collection: 'user' }
 );
 
-const User = model('User', UserSchema, 'User');
+UserSchema.index({ name: 1, email: 1, username: 1 });
 
-export default User;
+export default model('User', UserSchema, 'User');

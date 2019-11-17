@@ -18,9 +18,13 @@ export const MessageCreated = gql`
       content
       conversation {
         id
-      }
-      sender {
-        id
+        recipients {
+          id
+          recipient {
+            id
+            name
+          }
+        }
       }
     }
   }
