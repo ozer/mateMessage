@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useState } from 'react';
 import {
   View,
   TextInput,
@@ -43,10 +43,11 @@ const styles = StyleSheet.create({
 const ConversationInput = props => {
   // React-Hooks will be used in RN 0.59 version.
   // const [messageText, setMessageText] = useState('');
-  //
   // const handleMessageChange = value => setMessageText(value);
 
   const { onChangeText, messageText, conversationId, otherRecipient, personId } = props;
+
+  const [mText, changeText] = useState('');
 
   // console.log('otherRecipient -> ', otherRecipient);
 
@@ -56,28 +57,28 @@ const ConversationInput = props => {
         console.log('err at send message ', err.graphQLErrors, err.networkError)
       }
       mutation={SendMessage}
-      variables={{ content: messageText, conversationId }}
-      optimisticResponse={{
-         __typename: 'Mutation',
-        sendMessage: {
-           __typename: 'SendMessageResponse',
-          state: true,
-          messageData: {
-            id: 'randomid',
-            content: messageText,
-            loading: true,
-            __typename: 'MessageType',
-            conversation: {
-              id: conversationId,
-              __typename: 'ConversationType'
-            },
-            sender: {
-              id: personId,
-              __typename: 'UserType'
-            }
-          },
-        },
-      }}
+      variables={{ content: mText, conversationId }}
+      // optimisticResponse={{
+      //   __typename: 'Mutation',
+      //   sendMessage: {
+      //     __typename: 'SendMessageResponse',
+      //     state: true,
+      //     messageData: {
+      //       id: 'randomid',
+      //       content: messageText,
+      //       loading: true,
+      //       __typename: 'MessageType',
+      //       conversation: {
+      //         id: conversationId,
+      //         __typename: 'ConversationType'
+      //       },
+      //       sender: {
+      //         id: personId,
+      //         __typename: 'UserType'
+      //       }
+      //     },
+      //   },
+      // }}
       update={async (cache, { data: { sendMessage } }) => {
         console.log('sendMessage response -> ', sendMessage);
         if (sendMessage.state && sendMessage.messageData) {
@@ -115,17 +116,17 @@ const ConversationInput = props => {
             keyboardAppearance="dark"
             multiline
             returnKeyType="next"
-            value={messageText}
-            onChangeText={onChangeText}
+            value={mText}
+            onChangeText={changeText}
             style={styles.input}
           />
           <TouchableOpacity
-            disabled={!messageText}
+            disabled={!mText}
             onPress={() => {
-              onChangeText('');
+              changeText('');
               sendMessage({
                 variables: {
-                  content: messageText,
+                  content: mText,
                   conversationId
                 }
               });
@@ -143,4 +144,4 @@ const ConversationInput = props => {
   );
 };
 
-export default ConversationInput;
+export default memo(ConversationInput);

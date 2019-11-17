@@ -1,11 +1,12 @@
 import React from 'react';
+import gql from 'graphql-tag';
 import { AsyncStorage } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 import { split } from 'apollo-link';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
 import { ApolloClient } from 'apollo-client';
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider } from '@apollo/react-hooks';
 import { createHttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
@@ -13,9 +14,7 @@ import { CachePersistor } from 'apollo-cache-persist';
 import { Person } from './src/queries/Auth';
 import SplashScreen from './src/SplashScreen';
 import { goAuth, goHome } from './navigation';
-import Conversations from './src/containers/Conversations';
 import Settings from './src/containers/Settings';
-import SearchResult from './src/containers/Search/SearchResult';
 import People from './src/containers/People';
 import Conversation from './src/containers/Conversation';
 import { TokenAuthMutation } from './src/mutations/Auth';
@@ -23,12 +22,16 @@ import { ConversationCreated } from './src/subscriptions/Message';
 import { ConversationsQuery } from './src/queries/Feed';
 import SignIn from './src/containers/Authentication/Signin';
 import SignUp from './src/containers/Authentication/Signup';
+import MateList from './src/Mates/screens/MateList';
+import ConversationList from './src/Conversations/screens/ConversationList';
 
-const cache = new InMemoryCache();
+const cache = new InMemoryCache({
+  dataIdFromObject: object => object.id
+});
 
 export const persistor = new CachePersistor({
   cache,
-  storage: AsyncStorage
+  storage: AsyncStorage,
 });
 
 const httpLink = createHttpLink({
@@ -46,7 +49,6 @@ export const wsLink = new WebSocketLink({
   options: {
     connectionCallback: () => {
       console.log('Connection callback!');
-      subscribeChannel();
     },
     connectionParams: () => ({
       authToken: token
@@ -57,7 +59,6 @@ export const wsLink = new WebSocketLink({
 const authLink = setContext(async (_, { headers }) => {
   // get the authentication token from local storage if it exists
   const token = await AsyncStorage.getItem('token', null);
-  console.log('authLink Token -> ', token);
   // return the headers to the context so httpLink can read them
   return {
     headers: {
@@ -70,10 +71,13 @@ const authLink = setContext(async (_, { headers }) => {
 const link = split(
   ({ query }) => {
     const { kind, operation, name } = getMainDefinition(query);
-    return kind === 'OperationDefinition' && operation === 'mutation';
+    if (name && name.value) {
+      console.log('name -> ', name.value);
+    }
+    return kind === 'OperationDefinition' && operation === 'subscription'
   },
+  wsLink,
   authLink.concat(httpLink),
-  wsLink
 );
 
 const mApolloClient = new ApolloClient({
@@ -82,20 +86,14 @@ const mApolloClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',
-      errorPolicy: 'ignore'
-    },
-    query: {
-      errorPolicy: 'all'
+      returnPartialData: true,
     }
+  },
+  onError: ({ networkError, graphQLErrors }) => {
+    console.log('graphQLErrors', graphQLErrors)
+    console.log('networkError', networkError);
   }
 });
-
-const subscribeChannel = () => {
-  mApolloClient.subscribe({
-    query: ConversationCreated,
-    variables: { id: '' }
-  });
-};
 
 const withProvider = (Component, client = mApolloClient) => {
   return props => {
@@ -107,16 +105,14 @@ const withProvider = (Component, client = mApolloClient) => {
   };
 };
 
-Navigation.registerComponent(`navigation.playground.SplashScreen`, () =>
-  withProvider(SplashScreen)
-);
+Navigation.registerComponent(`SplashScreen`, () => withProvider(SplashScreen));
 
 Navigation.registerComponent('Auth.SignIn', () => withProvider(SignIn));
 
 Navigation.registerComponent('Auth.SignUp', () => withProvider(SignUp));
 
 Navigation.registerComponent('navigation.playground.Conversations', () =>
-  withProvider(Conversations)
+  withProvider(ConversationList)
 );
 
 Navigation.registerComponent('navigation.playground.Conversation', () =>
@@ -124,123 +120,38 @@ Navigation.registerComponent('navigation.playground.Conversation', () =>
 );
 
 Navigation.registerComponent('navigation.playground.People', () =>
-  withProvider(People)
-);
-
-Navigation.registerComponent(
-  'navigation.playground.SearchResult',
-  () => SearchResult
+  withProvider(MateList)
 );
 
 Navigation.registerComponent('navigation.playground.Settings', () =>
   withProvider(Settings)
 );
 
-const startApp = async () => {
-  Navigation.events().registerAppLaunchedListener(async () => {
-    await Navigation.setRoot({
-      root: {
-        component: {
-          name: 'navigation.playground.SplashScreen',
-          options: {
-            topBar: {
-              visible: false,
-              drawBehind: true
-            },
-            layout: {
-              orientation: ['portrait']
-            }
-          }
-        }
-      }
-    });
-  });
 
-  try {
-    await persistor.restore();
-    console.log('Persistor is restored!');
-    const Me = null;
-    const token = await AsyncStorage.getItem('token');
-    console.log('Token -> ', token);
-    if (token) {
-      console.log('Person', Me);
-      const result = await mApolloClient.mutate({
-        mutation: TokenAuthMutation,
-        variables: {}
-      });
-      console.log('isTokenAuthenticated result -> ', result);
-      if (result.data && result.data.isTokenAuthenticated) {
-        const { data } = result;
-        const { isTokenAuthenticated } = data;
-        const { state, user } = isTokenAuthenticated;
-        if (state && user) {
-          cache.writeQuery({
-            query: ConversationsQuery,
-            data: {
-              feed: []
-            }
-          });
-          cache.writeQuery({
-            query: Person,
-            data: {
-              id: user.id,
-              name: user.name,
-              username: user.username,
-              email: user.email,
-              jwt: user.jwt
-            }
-          });
-          setToken(user.jwt);
-          await wsLink.subscriptionClient.connect();
-          setTimeout(() => {
-            return goHome();
-          }, 2000);
-        } else {
-          console.log('INVALID TOKEN - GO TO SIGN !');
-          cache.writeQuery({
-            query: Person,
-            data: {
-              id: '',
-              name: '',
-              username: '',
-              email: '',
-              jwt: ''
-            }
-          });
-          return goAuth();
-        }
-      } else {
-        console.log('INVALID TOKEN - GO TO SIGN !');
-        cache.writeQuery({
-          query: Person,
-          data: {
-            id: '',
-            name: '',
-            username: '',
-            email: '',
-            jwt: ''
-          }
-        });
-        return goAuth();
-      }
-    } else {
-      console.log('NO TOKEN - GO TO SIGN !');
-      cache.writeQuery({
-        query: Person,
-        data: {
-          id: '',
-          name: '',
-          username: '',
-          email: '',
-          jwt: ''
-        }
-      });
-      return goAuth();
+const startApp = async () => Navigation.events().registerAppLaunchedListener(() => {
+  Navigation.setRoot({
+    root: {
+      stack: {
+        children: [
+          {
+            component: {
+              name: 'SplashScreen',
+              id: 'SplashScreen',
+              options: {
+                topBar: {
+                  visible: false,
+                  drawBehind: true
+                },
+                layout: {
+                  orientation: ['portrait']
+                }
+              },
+            },
+          },
+        ]
+      },
     }
-  } catch (e) {
-    console.log('ERROR AT INITIAL', e);
-    return goAuth();
-  }
-};
+  });
+});
 
 startApp().then(() => console.log('App is launched!'));

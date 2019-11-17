@@ -1,21 +1,25 @@
-import { Schema, model } from "mongoose";
-import MessageSchema from './Message';
-import User from './User';
+import { Schema, model, Types } from "mongoose";
+import { MessageSchema } from './Message';
 
-const ConversationSchema = new Schema(
-    {
-      title: String,
-      avatar: String,
-      recipients: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-      }],
-      messages: [MessageSchema],
-      created_at: { type: Date, default: new Date() }
+export const ConversationSchema = new Schema(
+  {
+    title: String,
+    avatar: String,
+    recipients: {
+      type: [{
+        recipient: {
+          type: Schema.Types.ObjectId,
+          ref: 'User'
+        }
+      }]
     },
-    { collection: "conversation" }
+    messages: {
+      type: [MessageSchema]
+    },
+    created_at: { type: Date, default: new Date() }
+  },
 );
 
-const Conversation = model("Conversation", ConversationSchema, "Conversation");
+ConversationSchema.index({ 'recipients.recipient': 1 });
 
-export default ConversationSchema;
+export default model("Conversation", ConversationSchema, "Conversation");

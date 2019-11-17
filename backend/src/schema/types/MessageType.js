@@ -1,10 +1,10 @@
-import {GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList} from 'graphql';
+import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList } from 'graphql';
 import mongoose from 'mongoose';
 import UserType from './UserType';
 import ConversationType from './ConversationType';
 
 const MessageType = new GraphQLObjectType({
-  name: 'MessageType',
+  name: 'Message',
   fields: () => ({
     id: {
       type: GraphQLID,

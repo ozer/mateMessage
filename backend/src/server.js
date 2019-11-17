@@ -2,13 +2,9 @@ import http from 'http';
 import { promisify } from 'util';
 import express from 'express';
 import mongoose from 'mongoose';
-import cors from 'cors';
-import JWT from 'jsonwebtoken';
-import { execute, subscribe } from 'graphql';
 import { ApolloServer } from 'apollo-server-express';
-import User from './db/models/User'; // eslint-disable-line
-import Conversation from './db/models/Conversation'; // eslint-disable-line
-import Message from './db/models/Message'; // eslint-disable-line
+import User from './db/models/User';
+import Conversation from './db/models/Conversation';
 
 // Getting base GraphQL Schema
 import schema from './schema';
@@ -22,7 +18,9 @@ let httpServer;
 export const initializeServer = async () => {
   console.log('ENVIRONMENT -> ', process.env.NODE_ENV);
   mongoose.connect(`mongodb://localhost:27017/${process.env.NODE_ENV}-MateMessage`, {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    createIndexes: true
   });
 
   await mongoose.connection
@@ -108,7 +106,7 @@ export const initializeServer = async () => {
   );
   console.log(
     `🚀 Subscriptions ready at ws://localhost:${PORT}${
-      apolloServer.subscriptionsPath
+    apolloServer.subscriptionsPath
     }`
   );
   return true;

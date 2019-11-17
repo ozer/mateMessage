@@ -1,26 +1,41 @@
-import {GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList} from 'graphql';
+import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLID,
+  GraphQLList
+} from 'graphql';
 import mongoose from 'mongoose';
 import UserType from './UserType';
 import MessageType from './MessageType';
 
 const ConversationType = new GraphQLObjectType({
-  name: 'ConversationType',
+  name: 'Conversation',
   fields: () => ({
     title: {
-      type: GraphQLString,
+      type: GraphQLString
     },
     avatar: {
-      type: GraphQLString,
-    },
-    recipients: {
-      type: GraphQLList(UserType),
+      type: GraphQLString
     },
     messages: {
-      type: GraphQLList(MessageType),
+      type: GraphQLList(MessageType)
+    },
+    recipients: {
+      type: GraphQLList(new GraphQLObjectType({
+        name: 'recipients',
+        fields: () => ({
+          id: {
+            type: GraphQLString,
+          },
+          recipient: {
+            type: UserType
+          }
+        })
+      }))
     },
     id: {
-      type: GraphQLID,
-    },
+      type: GraphQLID
+    }
   })
 });
 

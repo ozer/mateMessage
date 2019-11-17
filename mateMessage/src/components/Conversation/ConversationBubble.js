@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text } from 'react-native';
 
 const ConversationBubble = props => {
   const { message, me } = props;
   const { content, sender, loading } = message;
-  if (me.id && sender.id) {
+  if (me && me.id && sender && sender.id) {
     return (
       <View
         style={{
@@ -38,4 +38,4 @@ const ConversationBubble = props => {
   return null;
 };
 
-export default ConversationBubble;
+export default memo(ConversationBubble);
