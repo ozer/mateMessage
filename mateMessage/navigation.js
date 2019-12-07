@@ -1,14 +1,11 @@
-import { Navigation } from 'react-native-navigation';
+import { Navigation } from "react-native-navigation";
 
-export const goAuth = (componentId) => {
+export const goAuth = componentId => {
   return Navigation.setStackRoot(componentId, [
     {
       component: {
-        name: 'Auth.SignIn',
-        id: 'Auth.SignIn',
-        passProps: {
-          text: 'Root screen'
-        },
+        name: "Auth.SignIn",
+        id: "Auth.SignIn",
         options: {
           animations: {
             setStackRoot: {
@@ -19,7 +16,7 @@ export const goAuth = (componentId) => {
       }
     }
   ]);
-}
+};
 
 export const goSignUp = () =>
   Navigation.setRoot({
@@ -32,7 +29,7 @@ export const goSignUp = () =>
                 from: 0,
                 to: 1,
                 duration: 50000,
-                interpolation: 'accelerate'
+                interpolation: "accelerate"
               }
             }
           },
@@ -42,13 +39,13 @@ export const goSignUp = () =>
             height: 0
           },
           layout: {
-            orientation: ['portrait']
+            orientation: ["portrait"]
           }
         },
         children: [
           {
             component: {
-              name: 'Auth.SignUp'
+              name: "Auth.SignUp"
             }
           }
         ]
@@ -60,12 +57,7 @@ export const goHome = () =>
   Navigation.setRoot({
     root: {
       bottomTabs: {
-        id: 'HomeTab',
         options: {
-          topBar: {
-            visible: false,
-            drawBehind: false
-          },
           bottomTabs: {
             backgroundColor: '#f1f1f4',
             drawBehind: true,
@@ -77,7 +69,6 @@ export const goHome = () =>
         children: [
           {
             stack: {
-              id: 'PeopleTabStack',
               children: [
                 {
                   component: {
@@ -85,6 +76,7 @@ export const goHome = () =>
                     id: 'People',
                     options: {
                       topBar: {
+                      	drawBehind: false,
                         searchBar: true,
                         searchBarHiddenWhenScrolling: true,
                         hideNavBarOnFocusSearchBar: true,
@@ -96,16 +88,6 @@ export const goHome = () =>
                           visible: true
                         }
                       },
-                      // topBar: {
-                      //   visible: true,
-                      //   drawBehind: false,
-                      //   title: {
-                      //     text: 'Mates'
-                      //   },
-                      //   largeTitle: {
-                      //     visible: true
-                      //   }
-                      // },
                       bottomTab: {
                         fontSize: 12,
                         text: 'Mates',
@@ -119,11 +101,10 @@ export const goHome = () =>
           },
           {
             stack: {
-              id: 'ConversationTabStack',
               children: [
                 {
                   component: {
-                    name: 'navigation.playground.Conversations',
+                    name: 'ConversationList',
                     id: 'ConversationTab',
                     options: {
                       topBar: {
@@ -133,7 +114,7 @@ export const goHome = () =>
                           text: 'Chats'
                         },
                         largeTitle: {
-                          visible: true
+                          visible: true,
                         }
                       },
                       bottomTab: {

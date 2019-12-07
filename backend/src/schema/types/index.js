@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLList, GraphQLString } from 'graphql';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import UserType from './UserType';
 import ConversationType from './ConversationType';
 
@@ -56,7 +56,7 @@ const RootQuery = new GraphQLObjectType({
               return conversations;
             });
         }
-      },
+      }
     },
     feed: {
       type: new GraphQLList(ConversationType),
@@ -66,7 +66,6 @@ const RootQuery = new GraphQLObjectType({
         console.log('args', args);
         if (context && context.user) {
           if (args && args.id) {
-            const { user } = context;
             return Conversation.findById(args.id)
               .sort({ 'messages.created_at': 'desc' })
               .populate({ path: 'recipients.recipient' })
@@ -75,18 +74,44 @@ const RootQuery = new GraphQLObjectType({
               });
           }
           const { user } = context;
+          console.log('userId -> ', typeof user.id, user.id);
+
+          const cs = await Conversation.aggregate([
+            {
+              $match: {
+                recipients: {
+                  $in: [mongoose.Types.ObjectId(user.id)]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: 'Message',
+                localField: 'id',
+                foreignField: 'conversation',
+                as: 'messages'
+              }
+            }
+          ]);
+
+          console.log('cs -> ', cs.length);
+
           const convos = await Conversation.find({
-            $and: [
-              { 'recipients.recipient': user.id },
-            ]
-          }).populate({
-            path: 'recipients.recipient',
-            select: ['email', 'name']
+            $and: [{ recipients: user.id }]
           })
+            .populate({
+              path: 'recipients',
+              select: ['email', 'name']
+            })
             .slice({ messages: -50 })
             .sort({ 'messages.created_at': 'desc' });
+
+          convos.forEach(convo => {
+            const meIdx = convo.recipients.findIndex(r => r.id === user.id);
+            convo.recipients.splice(meIdx, 1);
+          });
           console.log('convos.length -> ', convos.length);
-          return convos;
+          return cs;
         }
         return null;
       }

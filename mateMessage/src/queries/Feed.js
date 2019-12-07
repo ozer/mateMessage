@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import gql from "graphql-tag";
 
 export const Users = gql`
   query People {
@@ -16,7 +16,7 @@ export const Users = gql`
 `;
 
 export const Feed = gql`
-  query FindConversation($id: String) {
+  query($id: String) {
     feed(id: $id) {
       id
       ...FeedFragment
@@ -28,13 +28,12 @@ export const Feed = gql`
     messages {
       id
       content
+      onFlight @client
     }
     recipients {
       id
-      recipient {
-        id
-        name
-      }
+      name
+      email
     }
   }
 `;

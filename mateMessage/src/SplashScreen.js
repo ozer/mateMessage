@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useQuery } from 'react-apollo';
 import gql from 'graphql-tag';
-import { View, Text, StyleSheet, KeyboardAvoidingView, TextInput, TouchableOpacity, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { goAuth, goHome } from '../navigation';
 import { wsLink, setToken } from '../index';
-import { Navigation } from 'react-native-navigation';
 
 const styles = StyleSheet.create({
   container: {
@@ -15,7 +14,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const SplashScreen = (props) => {
+const SplashScreen = ({ componentId }) => {
 
   const { data, error, loading } = useQuery(gql`
     query {
@@ -28,8 +27,6 @@ const SplashScreen = (props) => {
       }
     }
   `);
-
-  console.log('loading -> ', props);
 
   if (loading) {
     return (
@@ -51,7 +48,7 @@ const SplashScreen = (props) => {
   if (data.me) {
     setToken(data.me.jwt);
     wsLink.subscriptionClient.connect();
-    return goHome();
+    return goHome(componentId);
   }
 
 };

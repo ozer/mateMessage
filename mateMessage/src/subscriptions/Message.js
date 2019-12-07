@@ -20,10 +20,8 @@ export const MessageCreated = gql`
         id
         recipients {
           id
-          recipient {
-            id
-            name
-          }
+		  name
+		  email	
         }
       }
     }

@@ -79,29 +79,6 @@ const ConversationInput = props => {
       //     },
       //   },
       // }}
-      update={async (cache, { data: { sendMessage } }) => {
-        console.log('sendMessage response -> ', sendMessage);
-        if (sendMessage.state && sendMessage.messageData) {
-          const { messageData } = sendMessage;
-          const feed = cache.readQuery({ query: ConversationsQuery });
-          const { conversation, content, sender, loading } = messageData;
-          const conversationIndex = feed.feed.findIndex(
-            obj => obj.id === conversation.id
-          );
-          const foundConversation = feed.feed[conversationIndex];
-          console.log('foundConvo -> ', foundConversation);
-          const foundLoadingMessage = foundConversation.messages.find(msg => typeof msg.loading === 'boolean');
-          console.log('foundLoadingMessage -> ', foundLoadingMessage);
-          foundConversation.messages.push({
-            id: messageData.id,
-            content,
-            sender,
-            loading: !!loading,
-            __typename: 'MessageType'
-          });
-          cache.writeQuery({ query: ConversationsQuery, data: feed });
-        }
-      }}
     >
       {sendMessage => (
         <View style={{ ...styles.footer }}>

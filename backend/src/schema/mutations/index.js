@@ -6,157 +6,21 @@ import {
   GraphQLString
 } from 'graphql';
 import User from '../../db/models/User';
-import Message from '../../db/models/Message';
 import {
-  CreateConversationResponse,
-  SearchResponse,
-  SendMessageResponse,
   SignInResponse,
   SignUpResponse
 } from '../types/ResponseTypes';
-import Conversation from '../../db/models/Conversation';
-import {
-  publish,
-  publishConversation,
-  publishMessage,
-  sendMessageToRecipients
-} from '../subscriptions';
 import { generateToken } from '../../helpers/Authenticator';
-import UserType from '../types/UserType';
-import ConversationType from '../types/ConversationType';
+import {sendMessageMutation} from "./sendMessage/sendMessageMutation";
+import {createConversationMutation} from "./createConversation/createConversationMutation";
+import {createGroupConversationMutation} from "./createGroupConversation/createGroupConversationMutation";
 
 const mutations = new GraphQLObjectType({
   name: 'mutation',
   fields: () => ({
-    sendMessage: {
-      type: SendMessageResponse,
-      args: {
-        content: { type: GraphQLString },
-        conversationId: { type: GraphQLString },
-        recipientId: { type: GraphQLString }
-      },
-      resolve: async (
-        parentValue,
-        { conversationId, content, recipientId },
-        context
-      ) => {
-        if (context && context.user) {
-          const { user } = context;
-          if (!conversationId && recipientId) {
-            const existingConvo = await Conversation.findOne({
-              $and: [
-                { 'recipients.recipient': recipientId },
-                { 'recipients.recipient': context.user.id }
-              ],
-            }).populate({
-              path: 'recipients.recipient',
-              select: ['email', 'name']
-            });
-            console.log('existingConvo -> ', existingConvo);
-            if (existingConvo) {
-              const newMessage = new Message();
-              newMessage.sender = user.id;
-              newMessage.content = content;
-              existingConvo.messages.push(newMessage);
-              const a = await existingConvo.save();
-              sendMessageToRecipients({
-                recipients: existingConvo.recipients,
-                content,
-                senderId: user.id,
-                conversationId: existingConvo.id,
-                messageId: newMessage.id
-              });
-              return a;
-            }
-          }
-          const convo = await Conversation.findById(conversationId);
-          if (convo) {
-            const newMessage = new Message();
-            newMessage.sender = user.id;
-            newMessage.content = content;
-            convo.messages.push(newMessage);
-            const updatedConvo = await convo.save();
-            console.log('newMessage -> ', newMessage);
-            sendMessageToRecipients({
-              recipients: updatedConvo.recipients,
-              content,
-              senderId: user.id,
-              conversationId: updatedConvo.id,
-              messageId: newMessage.id
-            });
-            return updatedConvo;
-          }
-          if (recipientId) {
-            let newConvo = new Conversation();
-            newConvo.recipients.push({ recipient: user.id });
-            newConvo.recipients.push({ recipient: recipientId });
-            const newMessage = new Message();
-            newMessage.sender = user.id;
-            newMessage.content = content;
-            newConvo.messages.push(newMessage);
-            newConvo = await newConvo.save();
-            sendMessageToRecipients({
-              recipients: newConvo.recipients,
-              content,
-              senderId: user.id,
-              conversationId: newConvo.id,
-              messageId: newMessage.id
-            });
-            return newConvo;
-          }
-          return null;
-        }
-        return null;
-      }
-    },
-    createConversation: {
-      type: ConversationType,
-      args: {
-        recipient: { type: GraphQLString }
-      },
-      resolve: async (parentValue, { recipient }, context) => {
-        if (context && context.user) {
-          console.log('createConversation');
-          const existingConvo = await Conversation.find({
-            $and: [
-              { 'recipients.recipient': context.user.id },
-              { 'recipients.recipient': recipient }
-            ]
-          });
-          if (
-            existingConvo.filter(convo => convo.recipients.length === 2).length
-          ) {
-            return existingConvo[0];
-          }
-          let newConvo = new Conversation();
-          newConvo.recipients.push({ recipient: context.user.id });
-          newConvo.recipients.push({ recipient });
-          newConvo = await newConvo.save();
-          return newConvo;
-        }
-        return null;
-      }
-    },
-    createGroupConversation: {
-      type: ConversationType,
-      args: {
-        recipients: { type: new GraphQLList(GraphQLString) }
-      },
-      resolve: async (parentValue, { recipients }, context) => {
-        console.log('createGroupConversation');
-        if (context && context.user) {
-          let newConvo = new Conversation();
-          newConvo.recipients.push({ recipient: context.user.id });
-          recipients.map(recipient => {
-            newConvo.recipients.push({ recipient });
-          });
-          newConvo = await newConvo.save();
-          console.log(newConvo);
-          return newConvo;
-        }
-        return null;
-      }
-    },
+    sendMessage: sendMessageMutation,
+    createConversation: createConversationMutation,
+    createGroupConversation: createGroupConversationMutation,
     signUp: {
       type: SignUpResponse,
       args: {

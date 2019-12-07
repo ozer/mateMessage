@@ -12,16 +12,18 @@ import { validateToken } from './helpers/Authenticator';
 
 const PORT = 4000;
 mongoose.Promise = global.Promise;
-
+mongoose.set('useCreateIndex', true);
 let httpServer;
 
 export const initializeServer = async () => {
   console.log('ENVIRONMENT -> ', process.env.NODE_ENV);
-  mongoose.connect(`mongodb://localhost:27017/${process.env.NODE_ENV}-MateMessage`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    createIndexes: true
-  });
+  mongoose.connect(
+    `mongodb://localhost:27017/${process.env.NODE_ENV}-MateMessage`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    }
+  );
 
   await mongoose.connection
     .once('open', () => console.log('Connected to MongoLab instance.'))
@@ -48,7 +50,6 @@ export const initializeServer = async () => {
             if (result && result.id) {
               return User.findById(result.id, { password: 0 }).then(user => {
                 if (user) {
-                  console.log('The request is authenticated!');
                   return {
                     state: true,
                     user
@@ -105,9 +106,7 @@ export const initializeServer = async () => {
     `🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`
   );
   console.log(
-    `🚀 Subscriptions ready at ws://localhost:${PORT}${
-    apolloServer.subscriptionsPath
-    }`
+    `🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`
   );
   return true;
 };
@@ -118,4 +117,4 @@ export const killServer = async () => {
     await mongoose.disconnect();
     await httpServer.close();
   }
-} 
+};

@@ -21,17 +21,22 @@ const ConversationType = new GraphQLObjectType({
       type: GraphQLList(MessageType)
     },
     recipients: {
-      type: GraphQLList(new GraphQLObjectType({
-        name: 'recipients',
-        fields: () => ({
-          id: {
-            type: GraphQLString,
-          },
-          recipient: {
-            type: UserType
-          }
+      type: GraphQLList(
+        new GraphQLObjectType({
+          name: 'recipients',
+          fields: () => ({
+            id: {
+              type: GraphQLString
+            },
+            name: {
+              type: GraphQLString
+            },
+            email: {
+              type: GraphQLString
+            }
+          })
         })
-      }))
+      )
     },
     id: {
       type: GraphQLID

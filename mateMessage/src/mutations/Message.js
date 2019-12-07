@@ -25,17 +25,8 @@ export const CreateConversation = gql`
 export const SendMessage = gql`
   mutation SendMessage($content: String!, $conversationId: String) {
     sendMessage(content: $content, conversationId: $conversationId) {
-      state
-      messageData {
-        id
-        content
-        conversation {
-          id
-        }
-        sender {
-          id
-        }
-      }
+	  id
+      content
     }
   }
 `;

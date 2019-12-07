@@ -2,12 +2,16 @@ import React, { useMemo } from 'react';
 import { TouchableOpacity, View, Text, Image } from 'react-native';
 import { Avatar } from 'react-native-elements';
 import { getInitials } from '../helpers/mates';
+import {getConvoInitials} from "../helpers/convos";
 
 const ChatRow = ({ onPress, chat, lastM }) => {
+	const rowPress = () => {
+		onPress(chat);
+	};
 
     return (
         <TouchableOpacity
-            onPress={onPress}
+            onPress={rowPress}
             style={{
                 flexDirection: 'row',
                 paddingTop: 10,
@@ -19,7 +23,7 @@ const ChatRow = ({ onPress, chat, lastM }) => {
             <Avatar
                 rounded
                 size="medium"
-                title={'OC'}
+                title={getConvoInitials(chat)}
             />
             <View
                 style={{

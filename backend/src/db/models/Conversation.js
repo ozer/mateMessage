@@ -1,5 +1,4 @@
-import { Schema, model, Types } from "mongoose";
-import { MessageSchema } from './Message';
+import { Schema, model } from "mongoose";
 
 export const ConversationSchema = new Schema(
   {
@@ -7,19 +6,14 @@ export const ConversationSchema = new Schema(
     avatar: String,
     recipients: {
       type: [{
-        recipient: {
-          type: Schema.Types.ObjectId,
-          ref: 'User'
-        }
-      }]
-    },
-    messages: {
-      type: [MessageSchema]
+		  type: Schema.Types.ObjectId,
+		  ref: 'User'
+	  }]
     },
     created_at: { type: Date, default: new Date() }
   },
 );
 
-ConversationSchema.index({ 'recipients.recipient': 1 });
+ConversationSchema.index({ 'recipients': 1 });
 
 export default model("Conversation", ConversationSchema, "Conversation");
