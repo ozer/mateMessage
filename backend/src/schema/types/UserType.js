@@ -16,7 +16,19 @@ const UserType = new GraphQLObjectType({
       type: GraphQLString
     },
     id: {
-      type: GraphQLID
+      type: GraphQLID,
+      resolve: (parentVal) => {
+        console.log('conversation id ', parentVal);
+        if (parentVal.id) {
+          return parentVal.id.toString();
+        }
+
+        if(parentVal._id) {
+          return parentVal._id.toString();
+        }
+
+        return null;
+      }
     },
     jwt: {
       type: GraphQLString

@@ -1,4 +1,5 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
+import {ConversationSchema} from "./Conversation";
 
 export const MessageSchema = new Schema({
   content: String,
@@ -13,6 +14,6 @@ export const MessageSchema = new Schema({
   created_at: { type: Date, default: new Date() }
 });
 
-MessageSchema.index({ content: 1, sender: 1 });
+MessageSchema.index({ content: 1, sender: 1, conversation: 1 });
 
 export default model('Message', MessageSchema, 'Message');

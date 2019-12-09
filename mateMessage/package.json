@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@apollo/react-hooks": "3.1.1",
+    "@emotion/core": "^10.0.22",
+    "@emotion/native": "^10.0.22",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.6.4",
@@ -18,6 +20,7 @@
     "apollo-link-http": "^1.5.14",
     "apollo-link-ws": "^1.0.17",
     "apollo-utilities": "^1.2.1",
+    "emotion-theming": "^10.0.19",
     "graphql": "^14.2.1",
     "graphql-tag": "^2.10.1",
     "react": "^16.10.1",
@@ -26,6 +29,7 @@
     "react-native-elements": "^1.1.0",
     "react-native-navigation": "2.26.5",
     "react-native-vector-icons": "^6.4.2",
+    "styled-system": "^5.1.4",
     "subscriptions-transport-ws": "^0.9.16"
   },
   "devDependencies": {

@@ -26,10 +26,6 @@ const resolve = async (_, args, context) => {
     path: 'recipients',
     select: ['email', 'name']
   });
-  conversation.forEach(convo => {
-    const meIdx = convo.recipients.findIndex(r => r.id === user.id);
-    convo.recipients.splice(meIdx, 1);
-  });
   if (conversation) {
     return conversation;
   }
@@ -43,10 +39,6 @@ const resolve = async (_, args, context) => {
       select: ['email', 'name']
     })
     .execPopulate();
-  newConversation.forEach(convo => {
-    const meIdx = convo.recipients.findIndex(r => r.id === user.id);
-    convo.recipients.splice(meIdx, 1);
-  });
   sendMessageToRecipients({
     recipients: newConversation.recipients,
     senderId: user.id,

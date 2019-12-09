@@ -11,6 +11,7 @@ import schema from './schema';
 import { validateToken } from './helpers/Authenticator';
 
 const PORT = 4000;
+
 mongoose.Promise = global.Promise;
 mongoose.set('useCreateIndex', true);
 let httpServer;

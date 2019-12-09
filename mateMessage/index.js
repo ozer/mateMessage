@@ -20,6 +20,7 @@ import MateList from "./src/Mates/screens/MateList";
 import ConversationList from "./src/Conversations/screens/ConversationList";
 import Conversation from "./src/Conversations/screens/Conversation";
 import { Feed } from "./src/queries/Feed";
+import MatePreview from "./src/Mates/screens/MatePreview";
 
 const cache = new InMemoryCache({
   dataIdFromObject: object => object.id
@@ -144,6 +145,8 @@ Navigation.registerComponent("ConversationList", () =>
 );
 
 Navigation.registerComponent("Conversation", () => withProvider(Conversation));
+
+Navigation.registerComponent('MatePreview', () => withProvider(MatePreview));
 
 Navigation.registerComponent("navigation.playground.People", () =>
   withProvider(MateList)

@@ -1,6 +1,5 @@
-export const getInitials = mate => {
-  if (mate && mate.name) {
-    const { name } = mate;
+export const getInitials = (name) => {
+  if (name) {
     let words = name.split(' ');
     if (words.length >= 2) {
         const firstName = words[0];

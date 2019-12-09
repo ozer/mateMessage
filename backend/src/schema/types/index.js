@@ -6,6 +6,11 @@ import ConversationType from './ConversationType';
 const User = mongoose.model('User');
 const Conversation = mongoose.model('Conversation');
 
+ObjectId.prototype.valueOf = function() {
+  console.log('asdasdas');
+  return this.toString();
+};
+
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: () => ({
@@ -87,30 +92,23 @@ const RootQuery = new GraphQLObjectType({
             {
               $lookup: {
                 from: 'Message',
-                localField: 'id',
+                localField: '_id',
                 foreignField: 'conversation',
                 as: 'messages'
+              }
+            },
+            {
+              $lookup: {
+                from: 'User',
+                localField:  'recipients',
+                foreignField: '_id',
+                as: 'recipients'
               }
             }
           ]);
 
-          console.log('cs -> ', cs.length);
+          console.log('cs -> ', cs);
 
-          const convos = await Conversation.find({
-            $and: [{ recipients: user.id }]
-          })
-            .populate({
-              path: 'recipients',
-              select: ['email', 'name']
-            })
-            .slice({ messages: -50 })
-            .sort({ 'messages.created_at': 'desc' });
-
-          convos.forEach(convo => {
-            const meIdx = convo.recipients.findIndex(r => r.id === user.id);
-            convo.recipients.splice(meIdx, 1);
-          });
-          console.log('convos.length -> ', convos.length);
           return cs;
         }
         return null;

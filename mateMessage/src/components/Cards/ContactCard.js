@@ -1,19 +1,19 @@
-import React from 'react';
-import { TouchableOpacity, View, Text, Image } from 'react-native';
+import React, {useCallback} from 'react';
+import { TouchableOpacity, View, Text } from 'react-native';
 import { Avatar } from 'react-native-elements';
 import { getInitials } from '../../helpers/mates';
 
-const ContactCard = (props) => {
-  const { person, onPress } = props;
+const ContactCard = ({ person, onPress, onLongPress }) => {
   const { name, avatarUrl } = person;
 
-  const press = () => {
-    onPress(person);
-  }
+  const press = useCallback(() => {
+      onPress={}
+  }, [person]);
 
   return (
     <TouchableOpacity
       onPress={press}
+      onLongPress={onLongPress}
       style={{
         flexDirection: 'row',
         paddingTop: 10,

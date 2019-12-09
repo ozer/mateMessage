@@ -29,11 +29,13 @@ export const resolve = async (_, args, context) => {
   if (!conversation) {
     return null;
   }
+  console.log('conversation in sendMessage -> ', conversation.id);
   const newMessage = new Message();
   newMessage.content = content;
   newMessage.sender = user.id;
   newMessage.conversation = conversation.id;
   await newMessage.save();
+  console.log('newMessage -> ', newMessage);
 
   sendMessageToRecipients({
     recipients: conversation.recipients,

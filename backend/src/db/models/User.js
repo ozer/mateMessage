@@ -1,4 +1,5 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
+import {ConversationSchema} from "./Conversation";
 
 export const UserSchema = new Schema(
   {

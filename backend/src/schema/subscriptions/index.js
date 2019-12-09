@@ -11,15 +11,7 @@ export const sendMessageToRecipients = ({
   messageId,
   content
 }) => {
-  console.log('sendMessageToRecipients -> ', recipients);
-  const recs = recipients.map(r => {
-    console.log('r -> ', r);
-    return {
-      id: r.id,
-      name: r.name,
-      email: r.email
-    };
-  });
+  console.log('sendMessageToRecipients -> ', conversationId);
   for (const recipient of recipients) {
     if (senderId !== recipient.id) {
       publishMessage({
@@ -28,7 +20,7 @@ export const sendMessageToRecipients = ({
         senderId,
         messageId,
         recipientId: recipient.id,
-        recipients: recs
+        recipients
       });
     }
   }
