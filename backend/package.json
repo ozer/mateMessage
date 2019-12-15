@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node src/index.js",
-    "start:dev": "NODE_ENV=dev nodemon src/index.js --exec babel-node",
-    "start:prod": "NODE_ENV=prod pm2 start src/pm2Cluster.js -i 0",
+    "dev": "NODE_ENV=dev nodemon src/index.js --exec babel-node",
+    "prod": "NODE_ENV=prod pm2 start src/pm2Cluster.js -i 0",
     "test": "NODE_ENV=test mocha --require babel-register test/*.spec.js --exit"
   },
   "author": "Ozer Cevikaslan",
@@ -15,6 +15,7 @@
     "apollo-server-express": "^2.4.3",
     "babel-register": "^6.26.0",
     "body-parser": "^1.18.3",
+    "graphql-relay": "0.6.0",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",

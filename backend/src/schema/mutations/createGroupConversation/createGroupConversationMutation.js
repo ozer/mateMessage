@@ -1,7 +1,7 @@
 import { GraphQLList, GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
 import { sendMessageToRecipients } from '../../subscriptions';
-import ConversationType from '../../types/ConversationType';
+import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
   console.log('createGroupConversationMutation!');
@@ -36,7 +36,7 @@ const resolve = async (_, args, context) => {
 };
 
 export const createGroupConversationMutation = {
-  type: ConversationType,
+  type: conversationType,
   args: {
     recipientIds: { type: new GraphQLList(GraphQLString), required: true }
   },

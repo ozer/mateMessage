@@ -5,21 +5,21 @@ import {
   GraphQLList,
   GraphQLBoolean
 } from 'graphql';
-import MessageType from './MessageType';
-import UserType from './UserType';
-import ConversationType from './ConversationType';
+import messageType from './message/messageType';
+import userType from './user/userType';
+import conversationType from './conversation/conversationType';
 
 export const SearchResponse = new GraphQLObjectType({
   name: 'SearchResponse',
   fields: () => ({
     state: {
       type: GraphQLBoolean,
-      default: false,
+      default: false
     },
     searchData: {
-      type: GraphQLList(UserType)
+      type: GraphQLList(userType)
     }
-  }),
+  })
 });
 
 export const CreateConversationResponse = new GraphQLObjectType({
@@ -30,7 +30,7 @@ export const CreateConversationResponse = new GraphQLObjectType({
       default: false
     },
     conversationData: {
-      type: ConversationType
+      type: conversationType
     }
   })
 });
@@ -43,7 +43,7 @@ export const SendMessageResponse = new GraphQLObjectType({
       default: false
     },
     messageData: {
-      type: MessageType,
+      type: messageType
     }
   })
 });
@@ -56,10 +56,13 @@ export const SignInResponse = new GraphQLObjectType({
       default: false
     },
     message: {
-      type: GraphQLString,
+      type: GraphQLString
     },
     user: {
-      type: UserType
+      type: userType
+    },
+    jwt: {
+      type: GraphQLString
     }
   })
 });
@@ -72,10 +75,10 @@ export const SignUpResponse = new GraphQLObjectType({
       default: false
     },
     message: {
-      type: GraphQLString,
+      type: GraphQLString
     },
     user: {
-      type: UserType
+      type: userType
     }
   })
 });

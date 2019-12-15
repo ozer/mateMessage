@@ -18,6 +18,7 @@ const getConversation = obj => {
 const viewerType = new GraphQLObjectType({
   name: 'Viewer',
   isTypeOf: obj => {
+    console.log('asdsadas');
     if (obj.isViewer) {
       return obj;
     }

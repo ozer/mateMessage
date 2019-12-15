@@ -1,7 +1,6 @@
 import { PubSub } from 'apollo-server-express';
 import { GraphQLObjectType, GraphQLString, GraphQLList } from 'graphql';
-import MessageType from '../types/MessageType';
-import ConversationType from '../types/ConversationType';
+import messageType from '../types/message/messageType';
 const pubSub = new PubSub();
 
 export const sendMessageToRecipients = ({
@@ -53,7 +52,7 @@ const subscriptions = new GraphQLObjectType({
   name: 'subscription',
   fields: {
     messageCreated: {
-      type: MessageType,
+      type: messageType,
       subscribe: (params, {}, context) => {
         console.log('messageCreated Subscribed');
         console.log('new Message');

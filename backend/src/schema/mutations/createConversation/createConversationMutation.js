@@ -1,11 +1,7 @@
-import {
-  CreateConversationResponse,
-  SendMessageResponse
-} from '../../types/ResponseTypes';
 import { GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
 import { sendMessageToRecipients } from '../../subscriptions';
-import ConversationType from '../../types/ConversationType';
+import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
   console.log('createConversationMutation!');
@@ -48,7 +44,7 @@ const resolve = async (_, args, context) => {
 };
 
 export const createConversationMutation = {
-  type: ConversationType,
+  type: conversationType,
   args: {
     recipientId: { type: GraphQLString, required: true }
   },
