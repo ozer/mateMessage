@@ -1,6 +1,6 @@
-import { GraphQLObjectType } from 'graphql';
+import { GraphQLInt, GraphQLObjectType, GraphQLString } from 'graphql';
 import mongoose, { ObjectId } from 'mongoose';
-import { connectionArgs } from 'graphql-relay';
+import { connectionArgs, connectionFromArray } from 'graphql-relay';
 import { nodeField } from './node/nodeDefinition';
 import userType, { userConnection } from './user/userType';
 import { conversationConnection } from './conversation/conversationType';
@@ -9,10 +9,7 @@ import viewerType from './viewer/viewerType';
 const User = mongoose.model('User');
 const Conversation = mongoose.model('Conversation');
 
-ObjectId.prototype.valueOf = function() {
-  console.log('asdasdas');
-  return this.toString();
-};
+const getUserFromConnection = obj => obj;
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
@@ -30,45 +27,60 @@ const RootQuery = new GraphQLObjectType({
     node: nodeField,
     users: {
       type: userConnection,
-      args: connectionArgs
+      args: {
+        first: {
+          type: GraphQLInt
+        },
+        after: {
+          type: GraphQLString
+        }
+      },
+      resolve: async (parent, args, context) => {
+        if (!context.user) {
+          return null;
+        }
+        const { user } = context;
+
+        const users = await User.find({ _id: { $ne: user.id } }).limit(2);
+
+        return connectionFromArray(users.map(getUserFromConnection), {});
+      }
     },
     feed: {
       type: conversationConnection,
       args: connectionArgs,
       resolve: async (parentValue, args, context) => {
-        console.log('Fetching feed!');
-        console.log('args', args);
-        if (context && context.user) {
-          const { user } = context;
-          const feed = await Conversation.aggregate([
-            {
-              $match: {
-                recipients: {
-                  $in: [mongoose.Types.ObjectId(user.id)]
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: 'Message',
-                localField: '_id',
-                foreignField: 'conversationId',
-                as: 'messages'
-              }
-            },
-            {
-              $lookup: {
-                from: 'User',
-                localField: 'recipients',
-                foreignField: '_id',
-                as: 'recipients'
+        if (!context.user) {
+          return null;
+        }
+        const { user } = context;
+        const feed = await Conversation.aggregate([
+          {
+            $match: {
+              recipients: {
+                $in: [mongoose.Types.ObjectId(user.id)]
               }
             }
-          ]);
+          },
+          {
+            $lookup: {
+              from: 'Message',
+              localField: '_id',
+              foreignField: 'conversationId',
+              as: 'messages'
+            }
+          },
+          {
+            $lookup: {
+              from: 'User',
+              localField: 'recipients',
+              foreignField: '_id',
+              as: 'recipients'
+            }
+          }
+        ]);
 
-          return feed;
-        }
-        return null;
+        return feed;
       }
     },
     isTokenAuthenticated: {

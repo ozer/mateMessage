@@ -6,6 +6,7 @@ import {
 } from 'graphql-relay';
 import mongoose from 'mongoose';
 import { nodeInterface } from '../node/nodeDefinition';
+import { userConnection } from '../user/userType';
 import { conversationConnection } from '../conversation/conversationType';
 import Conversation from '../../../db/models/Conversation';
 import { idMapping } from '../../../helpers/mapping';
@@ -18,7 +19,6 @@ const getConversation = obj => {
 const viewerType = new GraphQLObjectType({
   name: 'Viewer',
   isTypeOf: obj => {
-    console.log('asdsadas');
     if (obj.isViewer) {
       return obj;
     }
@@ -40,6 +40,19 @@ const viewerType = new GraphQLObjectType({
     },
     avatar: {
       type: GraphQLString
+    },
+    mates: {
+      type: userConnection,
+      args: connectionArgs,
+      resolve: async (parentVal, args, context) => {
+        console.log('resolver of mates');
+        if (!context.user) {
+          return null;
+        }
+        const { user } = context;
+        const mates = await User.find({ _id: { $ne: user.id } });
+        return connectionFromArray(mates, args);
+      }
     },
     feed: {
       type: conversationConnection,

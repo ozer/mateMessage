@@ -1,0 +1,24 @@
+{
+  "__schema": {
+    "types": [
+      {
+        "kind": "INTERFACE",
+        "name": "Node",
+        "possibleTypes": [
+          {
+            "name": "Viewer"
+          },
+          {
+            "name": "User"
+          },
+          {
+            "name": "Conversation"
+          },
+          {
+            "name": "Message"
+          }
+        ]
+      }
+    ]
+  }
+}

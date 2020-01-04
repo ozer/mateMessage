@@ -68,7 +68,7 @@ export const initializeServer = async () => {
     },
     subscriptions: {
       onConnect: (connectionParams, webSocket) => {
-        console.log('socket-onConnect!', connectionParams);
+        console.log('onConnect: ', connectionParams);
         if (connectionParams.authToken) {
           const { authToken } = connectionParams;
           return validateToken(authToken)
@@ -76,7 +76,6 @@ export const initializeServer = async () => {
               if (result && result.id) {
                 return User.findById(result.id, { password: 0 }).then(user => {
                   if (user) {
-                    console.log('Socket connection is established!');
                     return {
                       user
                     };

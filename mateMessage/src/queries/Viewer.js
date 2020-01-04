@@ -4,6 +4,7 @@ export const Viewer = gql`
   query Viewer {
     viewer {
       id
+      userId
       email
       name
       username

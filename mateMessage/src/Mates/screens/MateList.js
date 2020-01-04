@@ -1,71 +1,107 @@
-import React, {useCallback} from 'react';
-import { View, Text, FlatList } from 'react-native';
-import { useQuery } from '@apollo/react-hooks';
-import { Mates as MatesQuery } from '../../queries/Mates';
-import {Navigation} from "react-native-navigation";
-import {ThemeProvider} from 'emotion-theming';
-import { theme } from '../../theme/theme';
+import React, { useCallback } from "react";
+import {View, Text, FlatList, ActionSheetIOS} from "react-native";
+import gql from "graphql-tag";
+import { useQuery } from "@apollo/react-hooks";
+import { Navigation } from "react-native-navigation";
+import { ThemeProvider } from "emotion-theming";
+import get from "lodash.get";
+import { theme } from "../../theme/theme";
 import MateRow from "../../UI/MateRow";
-import StyledText from "../../UI/StyledText";
 
 const ZeroStateMateList = () => {
-    return (
-        <View style={{ flex: 1, justifyContent: "center", flexDirection: "column" }}>
-            <Text style={{ fontSize: 28, color: "black" }}>Invite your mates!</Text>
-        </View>
-    );
+  return (
+    <View
+      style={{ flex: 1, justifyContent: "center", flexDirection: "column" }}
+    >
+      <Text style={{ fontSize: 28, color: "black" }}>Invite your mates!</Text>
+    </View>
+  );
 };
 
 const MateList = () => {
-    const { loading, error, data, refetch } = useQuery(MatesQuery);
+  const {
+    loading,
+    error,
+    data: { viewer },
+    refetch
+  } = useQuery(MateListQuery);
 
-    const onPress = (mate) => {
-        console.log('mate -> ', mate);
-    };
+  console.log("viewer", viewer);
 
-    const onLongPress = async (userId) => {
-        console.log('userId -> ', userId);
-        await Navigation.showOverlay({
-            component: {
-                id: 'MatePreview',
-                name: 'MatePreview',
-                options: {
-                    overlay: {
-                        interceptTouchOutside: true
-                    },
-                }
-            }
-        });
-    };
+  const edges = get(viewer, "mates.edges") || [];
+  console.log("edges ", edges);
 
-    const onRefresh = useCallback(async () => {
-        console.log('onRefresh!');
-        await refetch();
-    }, [refetch]);
+  const onPress = mate => {
+    console.log("mate -> ", mate);
+    ActionSheetIOS.showActionSheetWithOptions({
+      options: ['Cancel', 'Create Conversation'],
+      estructiveButtonIndex: 1,
+      cancelButtonIndex: 0,
+    }, (buttonIndex => {
+      if (buttonIndex === 1) {
+        console.log('create conversation!');
+      }
+    }));
+  };
 
-    return (
-        <ThemeProvider theme={theme}>
-            <View>
-                <FlatList
-                    refreshing={false}
-                    ListEmptyComponent={ZeroStateMateList}
-                    onRefresh={onRefresh}
-                    data={data.people}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                        <MateRow
-                            key={item.id}
-                            id={item.id}
-                            name={item.name}
-                            avatarUrl={item.avatarUrl}
-                            onContactPress={onPress}
-                            onContactLongPress={onLongPress}
-                        />
-                    )}
-                />
-            </View>
-        </ThemeProvider>
-    );
+  const onLongPress = async userId => {
+    await Navigation.showOverlay({
+      component: {
+        id: "MatePreview",
+        name: "MatePreview",
+        options: {
+          overlay: {
+            interceptTouchOutside: true
+          }
+        }
+      }
+    });
+  };
+
+  const onRefresh = useCallback(async () => {
+    console.log("onRefresh!");
+    await refetch();
+  }, [refetch]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <View>
+        <FlatList
+          refreshing={false}
+          ListEmptyComponent={ZeroStateMateList}
+          onRefresh={onRefresh}
+          data={edges}
+          keyExtractor={item => item.node.userId}
+          renderItem={({ item: { node } }) => (
+            <MateRow
+              id={node.userId}
+              name={node.name}
+              onContactPress={onPress}
+              onContactLongPress={onLongPress}
+            />
+          )}
+        />
+      </View>
+    </ThemeProvider>
+  );
 };
+
+const MateListQuery = gql`
+  query Viewer {
+    viewer {
+      id
+      mates {
+        edges {
+          node {
+            id
+            userId
+            name
+            email
+          }
+        }
+      }
+    }
+  }
+`;
 
 export default MateList;

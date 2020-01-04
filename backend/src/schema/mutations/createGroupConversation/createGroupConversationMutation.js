@@ -14,7 +14,9 @@ const resolve = async (_, args, context) => {
   let newConversation = new Conversation();
   newConversation.recipients.push(user.id);
   for (const recipientId of recipientIds) {
-    newConversation.recipients.push(recipientId);
+    if (recipientId !== user.id) {
+      newConversation.recipients.push(recipientId);
+    }
   }
   let result = await newConversation.save();
   result = await result
@@ -23,10 +25,10 @@ const resolve = async (_, args, context) => {
       select: ['email', 'name']
     })
     .execPopulate();
-  newConversation.forEach(convo => {
-    const meIdx = convo.recipients.findIndex(r => r.id === user.id);
-    convo.recipients.splice(meIdx, 1);
-  });
+  // newConversation.forEach(convo => {
+  //   const meIdx = convo.recipients.findIndex(r => r.id === user.id);
+  //   convo.recipients.splice(meIdx, 1);
+  // });
   sendMessageToRecipients({
     recipients: newConversation.recipients,
     senderId: user.id,

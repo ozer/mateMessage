@@ -1,25 +1,26 @@
 import React, { useEffect, useCallback, useRef } from "react";
 import { View, Text, Button, FlatList, ScrollView } from "react-native";
-import {
-  useQuery,
-  useSubscription,
-  useApolloClient
-} from "@apollo/react-hooks";
-import { Feed } from "../../queries/Feed";
-import { MessageCreated } from "../../subscriptions/Message";
-import { ChatRow } from "../../UI";
+import { useQuery, useSubscription } from "@apollo/react-hooks";
 import { Navigation } from "react-native-navigation";
 import gql from "graphql-tag";
+import get from "lodash.get";
+import { encode as btoa } from "base-64";
+import { MessageCreated } from "../../subscriptions/Message";
+import { ChatRow } from "../../UI";
+import {
+  getChatSubtitle,
+  getChatTitleByRecipients
+} from "../../helpers/convos";
 
 const ConversationList = ({ componentId }) => {
   const goToConversation = useCallback(
-    convo => {
+    conversationId => {
       return Navigation.push(componentId, {
         component: {
           name: "Conversation",
           id: "Conversation",
           passProps: {
-            conversationId: convo.id,
+            conversationId: conversationId,
             componentId: componentId
           },
           options: {
@@ -33,56 +34,78 @@ const ConversationList = ({ componentId }) => {
     [componentId]
   );
 
-  const { loading, error, data: conversations } = useQuery(Feed);
+  const {
+    loading,
+    error,
+    data: { viewer }
+  } = useQuery(ConversationListQuery);
+  const feedEdges = get(viewer, "feed.edges");
 
   useSubscription(MessageCreated, {
     onSubscriptionData: ({ client, subscriptionData }) => {
-      console.log("we got a message!", subscriptionData);
+      console.log("subscriptionData", subscriptionData);
       if (!subscriptionData.data) {
         return;
       }
       const { messageCreated } = subscriptionData.data;
-      const convoId = messageCreated.conversation.id;
+      const convoId = messageCreated.conversationId;
+      const encodedConversationId = btoa(`Conversation:${convoId}`);
       const convo = client.readFragment({
         fragment: gql`
-          fragment FeedFragment on Conversation {
+          fragment ConversationListConversation on Conversation {
             id
+            conversationId
             messages {
-              id
-              content
-              onFlight @client
-            }
-            recipients {
-              id
-              name
-              email
+              edges {
+                node {
+                  id
+                  messageId
+                  senderId
+                  conversationId
+                  content
+                  onFlight @client
+                  __typename
+                }
+              }
             }
           }
         `,
-        id: convoId
+        id: encodedConversationId
       });
 
-      convo.messages.push({
+      const newMessageNode = {
         __typename: "Message",
-        content: messageCreated.content,
         id: messageCreated.id,
+        messageId: messageCreated.messageId,
+        senderId: messageCreated.senderId,
+        conversationId: convoId,
+        content: messageCreated.content,
         onFlight: false
+      };
+
+      convo.messages.edges.push({
+        node: newMessageNode,
+        __typename: "MessageEdge"
       });
 
       return client.writeFragment({
-        id: convoId,
+        id: encodedConversationId,
         fragment: gql`
-          fragment FeedFragment on Conversation {
+          fragment ConversationListConversation on Conversation {
             id
+            conversationId
             messages {
-              id
-              content
-              onFlight @client
-            }
-            recipients {
-              id
-              name
-              email
+              edges {
+                node {
+                  id
+                  messageId
+                  senderId
+                  conversationId
+                  content
+                  onFlight @client
+                  __typename
+                }
+              }
             }
           }
         `,
@@ -109,23 +132,26 @@ const ConversationList = ({ componentId }) => {
     );
   }
 
-  const renderItem = ({ item: chat }) => {
-    let lastM = "";
-    if (!chat.messages.length) {
-      lastM = "Say Hi!";
-    } else {
-      const { length } = chat.messages;
-      lastM = chat.messages[length - 1].content;
-    }
+  const renderItem = ({ item: { node } }) => {
+    const conversationId = get(node, "conversationId") || "";
+    const title = get(node, "title") || "";
+    const recipients = get(node, "recipients") || [];
+    const messages = get(node, "messages") || [];
 
-    return <ChatRow onPress={goToConversation} chat={chat} lastM={lastM} />;
+    return (
+      <ChatRow
+        onPress={goToConversation}
+        conversationId={conversationId}
+        title={title || getChatTitleByRecipients(recipients)}
+        subtitle={getChatSubtitle(messages)}
+      />
+    );
   };
   return (
     <View style={{ flex: 1 }}>
-      <Text>{"Conversation List"}</Text>
       <FlatList
-        data={conversations.feed}
-        keyExtractor={item => item.id}
+        data={feedEdges}
+        keyExtractor={item => item.node.conversationId}
         renderItem={renderItem}
       />
     </View>
@@ -137,5 +163,39 @@ ConversationList.options = () => ({
     searchBarHiddenWhenScrolling: true
   }
 });
+
+const ConversationListQuery = gql`
+  query ConversationListQuery {
+    viewer {
+      id
+      feed {
+        edges {
+          node {
+            id
+            conversationId
+            title
+            recipients {
+              id
+              name
+            }
+            messages {
+              edges {
+                node {
+                  id
+                  content
+                  senderId
+                  conversationId
+                  messageId
+                  onFlight @client
+                  __typename
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 export default ConversationList;

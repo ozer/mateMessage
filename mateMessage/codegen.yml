@@ -1,5 +1,6 @@
 schema: http://localhost:4000/graphql
+overwrite: true
 generates:
-  ./src/introspection-result.json:
+  ./src/fragmentTypes.json:
     plugins:
       - fragment-matcher

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useApolloClient, useQuery } from "@apollo/react-hooks";
 import { Animated, FlatList, Keyboard, Text, View } from "react-native";
-import { Feed } from "../../queries/Feed";
+import { useQuery } from "@apollo/react-hooks";
+import gql from "graphql-tag";
+import get from "lodash.get";
 import { MessageRow } from "../../UI";
 import ConversationInput from "../containers/ConversationInput";
-import gql from "graphql-tag";
 
 const Conversation = ({ componentId, conversationId }) => {
   const keyboardHeight = useRef(new Animated.Value(0)).current;
@@ -44,28 +44,47 @@ const Conversation = ({ componentId, conversationId }) => {
     };
   }, [keyboardWillShow, keyboardWillHide]);
 
-  // const client = useApolloClient();
-  const { data } = useQuery(Feed, { fetchPolicy: "cache-and-network" });
-  const conversation = data.feed.find(c => c.id === conversationId);
-
-  // const conversation = client.readFragment({
-  //   fragment: gql`
-  //     fragment FeedFragment on Conversation {
-  //       id
-  //       messages {
-  //         id
-  //         content
-  //         onFlight @client
-  //       }
-  //       recipients {
-  //         id
-  //         name
-  //         email
-  //       }
-  //     }
-  //   `,
-  //   id: conversationId
-  // });
+  const {
+    data: { viewer }
+  } = useQuery(
+    gql`
+      query ConversationListQuery {
+        viewer {
+          id
+          feed {
+            edges {
+              node {
+                id
+                conversationId
+                title
+                recipients {
+                  id
+                  name
+                }
+                messages {
+                  edges {
+                    node {
+                      id
+                      messageId
+                      senderId
+                      conversationId
+                      content
+                      onFlight @client
+                      __typename
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    { fetchPolicy: "cache-only" }
+  );
+  const feedEdges = get(viewer, "feed.edges") || [];
+  const conversation = feedEdges.find(c => c.node.conversationId === conversationId);
+  const messageEdges = get(conversation, "node.messages.edges");
 
   const EmptyList = () => (
     <View>
@@ -73,11 +92,11 @@ const Conversation = ({ componentId, conversationId }) => {
     </View>
   );
 
-  const renderItem = ({ item: message }) => {
-    if (message.onFlight) {
+  const renderItem = ({ item: { node } }) => {
+    if (node.onFlight) {
       console.log("onFlight!");
     }
-    return <MessageRow content={message.content} onFlight={message.onFlight} />;
+    return <MessageRow content={node.content} onFlight={node.onFlight} />;
   };
 
   console.log("conversation Render!");
@@ -92,7 +111,8 @@ const Conversation = ({ componentId, conversationId }) => {
     >
       <FlatList
         ListEmptyComponent={EmptyList}
-        data={conversation.messages}
+        keyExtractor={item => item.node.messageId}
+        data={messageEdges}
         renderItem={renderItem}
       />
       <ConversationInput conversationId={conversationId} />

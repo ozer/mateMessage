@@ -7,7 +7,7 @@ export const ConversationSchema = new Schema(
     recipients: {
       type: [{
 		  type: Schema.Types.ObjectId,
-		  ref: 'User'
+		  ref: 'User',
 	  }]
     },
     created_at: { type: Date, default: new Date() }

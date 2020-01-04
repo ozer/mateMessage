@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import gql from "graphql-tag";
 
 export const CreateConversation = gql`
   mutation CreateConversation($receiverId: String!) {
@@ -25,8 +25,12 @@ export const CreateConversation = gql`
 export const SendMessage = gql`
   mutation SendMessage($content: String!, $conversationId: String) {
     sendMessage(content: $content, conversationId: $conversationId) {
-	  id
+      id
+      messageId
+      conversationId
+      senderId
       content
+      __typename
     }
   }
 `;

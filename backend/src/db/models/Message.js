@@ -1,15 +1,15 @@
 import mongoose, { Schema, model } from 'mongoose';
-import {ConversationSchema} from "./Conversation";
+import { ConversationSchema } from './Conversation';
 
 export const MessageSchema = new Schema({
   content: String,
-  sender: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  conversation: {
+  conversationId: {
     type: Schema.Types.ObjectId,
     ref: 'Conversation'
+  },
+  senderId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   },
   created_at: { type: Date, default: new Date() }
 });

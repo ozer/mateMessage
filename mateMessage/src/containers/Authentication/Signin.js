@@ -61,8 +61,8 @@ const SignIn = props => {
             update={async (cache, { data: { signIn } }) => {
               console.log('signIn -> ', signIn);
               if (signIn && signIn.state) {
-                const { user } = signIn;
-                const { id, name, username, email, jwt } = user;
+                const { user, jwt } = signIn;
+                const { id, name, username, email } = user;
                 setToken(jwt);
                 await AsyncStorage.setItem('token', jwt);
                 await wsLink.subscriptionClient.connect();

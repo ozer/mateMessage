@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   Text
 } from "react-native";
+import { encode as btoa } from "base-64";
 import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
 import { SendMessage } from "../../mutations/Message";
-import { FeedFragment } from "../../fragments/Feed";
 
 const ConversationInput = ({ conversationId }) => {
   const [content, changeText] = useState("");
@@ -18,37 +19,85 @@ const ConversationInput = ({ conversationId }) => {
     { loading: mutationLoading, error: mutationError }
   ] = useMutation(SendMessage, {
     variables: { content, conversationId },
-	  onError: (err) => {
-    	console.log('SendMessage Mutation Error: [', err, ']');
-	  },
+    onError: err => {
+      console.log("SendMessage Mutation Error: [", err, "]");
+    },
     optimisticResponse: {
       sendMessage: {
         __typename: "Message",
-        content: content,
-        id: Math.random().toString(),
+        id: new Date().getTime().toString(),
+        messageId: new Date().getTime().toString(),
+        senderId: "5debbf8682140b15dfa46d15",
+        conversationId,
+        content,
         isOptimistic: true
       }
     },
     update: (cache, { data }) => {
+      const isOptimistic = data.sendMessage.isOptimistic;
+      const encodedConversationId = btoa(`Conversation:${conversationId}`);
+      console.log("isOptimistic -> ", isOptimistic);
       console.log("update!!", data);
       const convo = cache.readFragment({
-        id: conversationId,
-        fragment: FeedFragment
+        id: encodedConversationId,
+        fragment: gql`
+          fragment ConversationInputConversation on Conversation {
+            id
+            conversationId
+            messages {
+              edges {
+                node {
+                  __typename
+                  id
+                  messageId
+                  senderId
+                  conversationId
+                  content
+                  onFlight @client
+                }
+              }
+            }
+          }
+        `
       });
-      const isOptimistic = data.sendMessage.isOptimistic;
-      console.log("isOptimistic -> ", isOptimistic);
-      convo.messages.push({
-        __typename: "Message",
-        id: data.sendMessage.id,
-        content: data.sendMessage.content,
-        onFlight: !!isOptimistic
-      });
+
+      const newMessage = {
+        node: {
+          id: data.sendMessage.id,
+          __typename: "Message",
+          messageId: data.sendMessage.messageId,
+          senderId: data.sendMessage.senderId,
+          conversationId,
+          content: data.sendMessage.content,
+          onFlight: !!isOptimistic
+        },
+        __typename: "MessageEdge"
+      };
+
+      convo.messages.edges.push(newMessage);
+
       return cache.writeFragment({
-        id: conversationId,
-        fragment: FeedFragment,
-        data: {
-          ...convo
-        }
+        id: encodedConversationId,
+        fragment: gql`
+          fragment ConversationInputConversation on Conversation {
+            id
+            conversationId
+            messages {
+              edges {
+                node {
+                  __typename
+                  id
+                  messageId
+                  senderId
+                  conversationId
+                  content
+                  onFlight @client
+                }
+              }
+            }
+          }
+        `,
+        data: convo
       });
     }
   });

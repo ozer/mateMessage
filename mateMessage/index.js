@@ -10,7 +10,10 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import { createHttpLink } from "apollo-link-http";
 import { onError } from "apollo-link-error";
 import { setContext } from "apollo-link-context";
-import { InMemoryCache } from "apollo-cache-inmemory";
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher
+} from "apollo-cache-inmemory";
 import { CachePersistor } from "apollo-cache-persist";
 import SplashScreen from "./src/SplashScreen";
 import Settings from "./src/containers/Settings";
@@ -21,9 +24,16 @@ import ConversationList from "./src/Conversations/screens/ConversationList";
 import Conversation from "./src/Conversations/screens/Conversation";
 import { Feed } from "./src/queries/Feed";
 import MatePreview from "./src/Mates/screens/MatePreview";
+import Home from "./src/Home/screens/Home";
+import introspectionQueryResultData from "./src/fragmentTypes";
+
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData
+});
 
 const cache = new InMemoryCache({
-  dataIdFromObject: object => object.id
+  dataIdFromObject: object => object.id,
+  fragmentMatcher
 });
 
 export const persistor = new CachePersistor({
@@ -47,9 +57,13 @@ export const wsLink = new WebSocketLink({
     connectionCallback: () => {
       console.log("Connection callback!");
     },
-    connectionParams: () => ({
-      authToken: token
-    }),
+    connectionParams: async () => {
+      console.log("callback of connectionParams");
+      const token = await AsyncStorage.getItem("token");
+      return {
+        authToken: token
+      };
+    },
     reconnect: true,
     reconnectionAttempts: 30,
     timeout: 2500
@@ -140,17 +154,17 @@ Navigation.registerComponent("Auth.SignIn", () => withProvider(SignIn));
 
 Navigation.registerComponent("Auth.SignUp", () => withProvider(SignUp));
 
+Navigation.registerComponent("Home", () => withProvider(Home));
+
+Navigation.registerComponent("MateList", () => withProvider(MateList));
+
 Navigation.registerComponent("ConversationList", () =>
   withProvider(ConversationList)
 );
 
 Navigation.registerComponent("Conversation", () => withProvider(Conversation));
 
-Navigation.registerComponent('MatePreview', () => withProvider(MatePreview));
-
-Navigation.registerComponent("navigation.playground.People", () =>
-  withProvider(MateList)
-);
+Navigation.registerComponent("MatePreview", () => withProvider(MatePreview));
 
 Navigation.registerComponent("navigation.playground.Settings", () =>
   withProvider(Settings)

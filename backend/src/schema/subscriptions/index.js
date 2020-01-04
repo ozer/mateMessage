@@ -1,49 +1,70 @@
 import { PubSub } from 'apollo-server-express';
-import { GraphQLObjectType, GraphQLString, GraphQLList } from 'graphql';
+import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLList,
+  GraphQLBoolean
+} from 'graphql';
 import messageType from '../types/message/messageType';
 const pubSub = new PubSub();
 
-export const sendMessageToRecipients = ({
+export const sendIsTypingToRecipients = ({
   recipients,
   conversationId,
   senderId,
-  messageId,
-  content
+  isTyping
 }) => {
-  console.log('sendMessageToRecipients -> ', conversationId);
+  for (const recipient of recipients) {
+    if (senderId !== recipient.id) {
+      pubSub.publish(recipient.id, {
+        isTyping: {
+          conversationId,
+          senderId,
+          isTyping
+        }
+      });
+    }
+  }
+};
+
+export const sendMessageToRecipients = ({
+  id,
+  messageId,
+  conversationId,
+  senderId,
+  content,
+  recipients
+}) => {
+  console.log('recipients ', recipients);
   for (const recipient of recipients) {
     if (senderId !== recipient.id) {
       publishMessage({
-        content,
+        id,
+        messageId,
         conversationId,
         senderId,
-        messageId,
         recipientId: recipient.id,
-        recipients
+        content
       });
     }
   }
 };
 
 export const publishMessage = ({
-  content,
+  id,
+  messageId,
   conversationId,
   senderId,
-  messageId,
   recipientId,
-  recipients
+  content
 }) => {
   return pubSub.publish(recipientId, {
     messageCreated: {
-      id: messageId,
+      id,
+      messageId,
+      conversationId,
       content,
-      conversation: {
-        id: conversationId,
-        recipients
-      },
-      sender: {
-        id: senderId
-      }
+      senderId
     }
   });
 };
@@ -55,7 +76,6 @@ const subscriptions = new GraphQLObjectType({
       type: messageType,
       subscribe: (params, {}, context) => {
         console.log('messageCreated Subscribed');
-        console.log('new Message');
         if (context && context.user) {
           const { user } = context;
           console.log('Subscribing to messageCreated -> ', user.id);
@@ -63,6 +83,30 @@ const subscriptions = new GraphQLObjectType({
           return pubSub.asyncIterator([subscriptionPath]);
         }
         return null;
+      }
+    },
+    isTyping: {
+      type: new GraphQLObjectType({
+        name: 'IsTyping',
+        fields: () => ({
+          isTyping: {
+            type: GraphQLBoolean
+          },
+          senderId: {
+            type: GraphQLString
+          },
+          conversationId: {
+            type: GraphQLString
+          }
+        })
+      }),
+      subscribe: (params, {}, context) => {
+        if (!context.user) {
+          return null;
+        }
+        const { user } = context;
+        const subscriptionPath = user.id;
+        return pubSub.asyncIterator([subscriptionPath]);
       }
     }
   }

@@ -10,8 +10,8 @@ export const SignInMutation = gql`
         name
         email
         username
-        jwt
       }
+      jwt
     }
   }
 `;

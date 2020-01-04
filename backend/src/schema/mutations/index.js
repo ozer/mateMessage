@@ -11,11 +11,13 @@ import { generateToken } from '../../helpers/Authenticator';
 import { sendMessageMutation } from './sendMessage/sendMessageMutation';
 import { createConversationMutation } from './createConversation/createConversationMutation';
 import { createGroupConversationMutation } from './createGroupConversation/createGroupConversationMutation';
+import {sendIsTypingMutation} from "./sendIsTyping/sendIsTypingMutation";
 
 const mutations = new GraphQLObjectType({
   name: 'mutation',
   fields: () => ({
     sendMessage: sendMessageMutation,
+    sendIsTyping:  sendIsTypingMutation,
     createConversation: createConversationMutation,
     createGroupConversation: createGroupConversationMutation,
     signUp: {
@@ -29,9 +31,7 @@ const mutations = new GraphQLObjectType({
       resolve(parentValue, { email, name, username, password }) {
         console.log('SignUp Mutation -> ', username);
         return User.findOne({ username }).then(user => {
-          console.log('user -> ', user);
           if (!user) {
-            console.log('Not Existing');
             return User.create({
               name,
               email,

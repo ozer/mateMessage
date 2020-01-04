@@ -15,15 +15,11 @@ export const MessageCreated = gql`
   subscription MessageCreated {
     messageCreated {
       id
+      senderId
+      messageId
+      conversationId
       content
-      conversation {
-        id
-        recipients {
-          id
-		  name
-		  email	
-        }
-      }
+      created_at
     }
   }
 `;

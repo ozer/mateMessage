@@ -12,61 +12,23 @@ const delay = () => {
   });
 };
 
-export const resolve = async (_, args, context) => {
-  console.log('sendMessageMutation!');
-  await delay();
-  if (!context.user) {
-    console.log('No Context!');
-    return null;
-  }
-  const { user } = context;
-  const { content, conversationId } = args;
-  const conversation = await Conversation.findById(conversationId).populate({
-    path: 'recipients',
-    select: ['email', 'name'],
-    match: { id: { $ne: user.id } }
-  });
-  if (!conversation) {
-    return null;
-  }
-  console.log('conversation in sendMessage -> ', conversation.id);
-  const newMessage = new Message();
-  newMessage.content = content;
-  newMessage.sender = user.id;
-  newMessage.conversation = conversation.id;
-  await newMessage.save();
-  console.log('newMessage -> ', newMessage);
-
-  sendMessageToRecipients({
-    recipients: conversation.recipients,
-    content,
-    senderId: user.id,
-    conversationId: conversation.id,
-    messageId: newMessage.id
-  });
-
-  return {
-    content,
-    id: newMessage.id,
-    sender: user.id,
-    conversation: conversation.id
-  };
-};
-
 export const sendMessageMutation = {
   type: new GraphQLObjectType({
     name: 'messageSendData',
     fields: () => ({
       id: {
-        type: GraphQLID
+        type: GraphQLString
+      },
+      messageId: {
+        type: GraphQLString
+      },
+      conversationId: {
+        type: GraphQLString
+      },
+      senderId: {
+        type: GraphQLString
       },
       content: {
-        type: GraphQLString
-      },
-      sender: {
-        type: GraphQLString
-      },
-      conversation: {
         type: GraphQLString
       }
     })
@@ -75,5 +37,45 @@ export const sendMessageMutation = {
     content: { type: GraphQLString, required: true },
     conversationId: { type: GraphQLString, required: true }
   },
-  resolve
+  resolve: async (_, args, context) => {
+    await delay();
+    if (!context.user) {
+      console.log('No Context!');
+      return null;
+    }
+    const { user } = context;
+    const { content, conversationId } = args;
+    const conversation = await Conversation.findById(conversationId).populate({
+      path: 'recipients',
+      select: ['email', 'name']
+      // match: { id: { $ne: user.id } }
+    });
+    if (!conversation) {
+      return null;
+    }
+    const newMessage = new Message();
+    newMessage.content = content;
+    newMessage.senderId = user.id;
+    newMessage.conversationId = conversation.id;
+    await newMessage.save();
+
+    const base64 = Buffer.from(`Message:${newMessage.id}`).toString('base64');
+
+    sendMessageToRecipients({
+      id: base64,
+      messageId: newMessage.id,
+      conversationId: conversation.id,
+      senderId: user.id,
+      recipients: conversation.recipients,
+      content
+    });
+
+    return {
+      id: base64,
+      messageId: newMessage._id,
+      conversationId: conversation.id,
+      senderId: user.id,
+      content
+    };
+  }
 };

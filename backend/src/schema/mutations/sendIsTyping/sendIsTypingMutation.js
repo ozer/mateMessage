@@ -6,7 +6,7 @@ import {
 } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
 import Message from '../../../db/models/Message';
-import { sendIsTypingNotificationToRecipients } from '../../subscriptions';
+import { sendIsTypingToRecipients } from '../../subscriptions';
 
 export const resolve = async (_, args, context) => {
   console.log('sendIsTypingMutation!');
@@ -15,7 +15,7 @@ export const resolve = async (_, args, context) => {
     return null;
   }
   const { user } = context;
-  const { typing, conversationId } = args;
+  const { isTyping, conversationId } = args;
 
   const conversation = await Conversation.findById(conversationId).populate({
     path: 'recipients',
@@ -27,15 +27,15 @@ export const resolve = async (_, args, context) => {
   }
   console.log('conversation in sendIsTypingMutation -> ', conversation.id);
 
-  sendIsTypingNotificationToRecipients({
-    typing,
+  sendIsTypingToRecipients({
+    isTyping,
     recipients: conversation.recipients,
     senderId: user.id,
     conversationId: conversation.id
   });
 
   return {
-    typing,
+    isTyping,
     senderId: user.id,
     conversationId: conversation.id
   };
@@ -45,7 +45,7 @@ export const sendIsTypingMutation = {
   type: new GraphQLObjectType({
     name: 'sendIsTypingData',
     fields: () => ({
-      typing: {
+      isTyping: {
         type: GraphQLBoolean
       },
       senderId: {
@@ -57,7 +57,7 @@ export const sendIsTypingMutation = {
     })
   }),
   args: {
-    typing: { type: GraphQLBoolean, required: true },
+    isTyping: { type: GraphQLBoolean, required: true },
     conversationId: { type: GraphQLString, required: true }
   },
   resolve

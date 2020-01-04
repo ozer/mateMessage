@@ -1,17 +1,23 @@
 import gql from "graphql-tag";
 
 export const FeedFragment = gql`
-  fragment FeedFragment on Conversation {
-    id
-    messages {
-      id
-      content
-      onFlight @client		
-    }
-    recipients {
-      id
-      name
-      email
+  fragment FeedFragment on ConversationConnection {
+    edges {
+      node {
+        id
+        recipients {
+          id
+          name
+        }
+        messages {
+          edges {
+            node {
+              id
+              content
+            }
+          }
+        }
+      }
     }
   }
 `;
