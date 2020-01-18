@@ -14,7 +14,7 @@ class Settings extends Component {
     console.log('client -> ', client);
     // Close socket connection.
     wsLink.subscriptionClient.close();
-    await AsyncStorage.clear();
+    await AsyncStorage.removeItem('token');
     return goAuth();
   };
 

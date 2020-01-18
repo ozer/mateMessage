@@ -3,8 +3,10 @@ import { promisify } from 'util';
 import express from 'express';
 import mongoose from 'mongoose';
 import { ApolloServer } from 'apollo-server-express';
+import helmet from 'helmet';
+import bodyParser from 'body-parser';
 import User from './db/models/User';
-import Conversation from './db/models/Conversation';
+import restAPI from './routes';
 
 // Getting base GraphQL Schema
 import schema from './schema';
@@ -35,6 +37,9 @@ export const initializeServer = async () => {
 
   /** BASE Express server definition **/
   const app = express();
+  app.use(helmet());
+  app.use(bodyParser.json());
+  app.use('/api', restAPI);
 
   const apolloServer = new ApolloServer({
     schema,

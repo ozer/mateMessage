@@ -1,21 +1,27 @@
-import { Navigation } from "react-native-navigation";
+import { Navigation } from 'react-native-navigation';
 
-export const goAuth = componentId => {
-  return Navigation.setStackRoot(componentId, [
-    {
-      component: {
-        name: "Auth.SignIn",
-        id: "Auth.SignIn",
-        options: {
-          animations: {
-            setStackRoot: {
-              enabled: true
+export const goAuth = () => {
+  return Navigation.setRoot({
+    root: {
+      stack: {
+        children: [
+          {
+            component: {
+              name: 'Auth.SignIn',
+              id: 'Auth.SignIn',
+              options: {
+                animations: {
+                  setStackRoot: {
+                    enabled: true
+                  }
+                }
+              }
             }
           }
-        }
+        ]
       }
     }
-  ]);
+  });
 };
 
 export const goSignUp = () =>
@@ -29,7 +35,7 @@ export const goSignUp = () =>
                 from: 0,
                 to: 1,
                 duration: 50000,
-                interpolation: "accelerate"
+                interpolation: 'accelerate'
               }
             }
           },
@@ -39,13 +45,13 @@ export const goSignUp = () =>
             height: 0
           },
           layout: {
-            orientation: ["portrait"]
+            orientation: ['portrait']
           }
         },
         children: [
           {
             component: {
-              name: "Auth.SignUp"
+              name: 'Auth.SignUp'
             }
           }
         ]
@@ -59,11 +65,11 @@ export const goHome = () =>
       bottomTabs: {
         options: {
           bottomTabs: {
-            backgroundColor: "#f1f1f4",
+            backgroundColor: '#f1f1f4',
             drawBehind: true,
             animate: true,
             visible: true,
-            titleDisplayMode: "alwaysShow"
+            titleDisplayMode: 'alwaysShow'
           }
         },
         children: [
@@ -72,8 +78,8 @@ export const goHome = () =>
               children: [
                 {
                   component: {
-                    name: "Home",
-                    id: "Home",
+                    name: 'Home',
+                    id: 'Home',
                     options: {
                       topBar: {
                         drawBehind: true,
@@ -81,8 +87,8 @@ export const goHome = () =>
                       },
                       bottomTab: {
                         fontSize: 12,
-                        text: "Home",
-                        icon: require("./src/assets/icons/people-tab-icon.png")
+                        text: 'Home',
+                        icon: require('./src/assets/icons/home-tab-icon.png')
                       }
                     }
                   }
@@ -95,17 +101,17 @@ export const goHome = () =>
               children: [
                 {
                   component: {
-                    name: "MateList",
-                    id: "MateList",
+                    name: 'MateList',
+                    id: 'MateList',
                     options: {
                       topBar: {
                         drawBehind: false,
                         searchBar: true,
                         searchBarHiddenWhenScrolling: true,
                         hideNavBarOnFocusSearchBar: true,
-                        searchBarPlaceholder: "Search",
+                        searchBarPlaceholder: 'Search',
                         title: {
-                          text: "Mates"
+                          text: 'Mates'
                         },
                         largeTitle: {
                           visible: true
@@ -113,8 +119,8 @@ export const goHome = () =>
                       },
                       bottomTab: {
                         fontSize: 12,
-                        text: "Mates",
-                        icon: require("./src/assets/icons/people-tab-icon.png")
+                        text: 'Mates',
+                        icon: require('./src/assets/icons/people-tab-icon.png')
                       }
                     }
                   }
@@ -127,14 +133,14 @@ export const goHome = () =>
               children: [
                 {
                   component: {
-                    name: "ConversationList",
-                    id: "ConversationTab",
+                    name: 'ConversationList',
+                    id: 'ConversationTab',
                     options: {
                       topBar: {
                         visible: true,
                         drawBehind: false,
                         title: {
-                          text: "Chats"
+                          text: 'Chats'
                         },
                         largeTitle: {
                           visible: true
@@ -142,8 +148,8 @@ export const goHome = () =>
                       },
                       bottomTab: {
                         fontSize: 12,
-                        text: "Chats",
-                        icon: require("./src/assets/icons/chats-tab-icon.png")
+                        text: 'Chats',
+                        icon: require('./src/assets/icons/chats-tab-icon.png')
                       }
                     }
                   }
@@ -156,12 +162,12 @@ export const goHome = () =>
               children: [
                 {
                   component: {
-                    name: "navigation.playground.Settings",
-                    id: "SettingsTab",
+                    name: 'navigation.playground.Settings',
+                    id: 'SettingsTab',
                     options: {
                       topBar: {
                         title: {
-                          text: "Settings"
+                          text: 'Settings'
                         },
                         largeTitle: {
                           visible: true
@@ -169,8 +175,8 @@ export const goHome = () =>
                       },
                       bottomTab: {
                         fontSize: 12,
-                        text: "Settings",
-                        icon: require("./src/assets/icons/settings-tab-icon.png")
+                        text: 'Settings',
+                        icon: require('./src/assets/icons/settings-tab-icon.png')
                       }
                     }
                   }
