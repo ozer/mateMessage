@@ -14,6 +14,6 @@ export const MessageSchema = new Schema({
   created_at: { type: Date, default: new Date() }
 });
 
-MessageSchema.index({ content: 1, sender: 1, conversation: 1 });
+MessageSchema.index({ content: 1, senderId: 1, conversationId: 1 });
 
 export default model('Message', MessageSchema, 'Message');

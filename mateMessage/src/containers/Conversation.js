@@ -1,4 +1,4 @@
-import React, { useEffect, PureComponent } from 'react';
+import React, { useEffect, PureComponent } from "react";
 import {
   View,
   Text,
@@ -6,19 +6,19 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Animated
-} from 'react-native';
-import { Navigation } from 'react-native-navigation';
-import { withApollo, Query } from 'react-apollo';
-import gql from 'graphql-tag';
-import ConversationInput from '../components/Conversation/ConversationInput';
+} from "react-native";
+import { Navigation } from "react-native-navigation";
+import { withApollo, Query } from "react-apollo";
+import gql from "graphql-tag";
+import ConversationInput from "../components/Conversation/ConversationInput";
 
-import { ConversationsQuery, FindConversation } from '../queries/Feed';
-import { Person } from '../queries/Auth';
-import ChatContactCard from './Conversations';
-import ConversationBubble from '../components/Conversation/ConversationBubble';
+import { ConversationsQuery, FindConversation } from "../queries/Feed";
+import { Person } from "../queries/Auth";
+import ChatContactCard from "./Conversations";
+import ConversationBubble from "../components/Conversation/ConversationBubble";
 
 const renderFooter = () => (
-  <View style={{ height: 10, flex: 1, flexDirection: 'row' }} />
+  <View style={{ height: 10, flex: 1, flexDirection: "row" }} />
 );
 
 class Conversation extends PureComponent {
@@ -27,7 +27,7 @@ class Conversation extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      messageText: '',
+      messageText: "",
       Me: null,
       otherRecipient: null,
       error: false
@@ -39,11 +39,11 @@ class Conversation extends PureComponent {
   componentDidMount() {
     try {
       this.keyboardWillShowSub = Keyboard.addListener(
-        'keyboardWillShow',
+        "keyboardWillShow",
         this.keyboardWillShow
       );
       this.keyboardWillHideSub = Keyboard.addListener(
-        'keyboardWillHide',
+        "keyboardWillHide",
         this.keyboardWillHide
       );
       const { props } = this;
@@ -57,11 +57,11 @@ class Conversation extends PureComponent {
       const Me = client.readQuery({ query: Person });
       if (Conv && Conv.feed && Conv.feed.length) {
         const m = Conv.feed.find(c => c.id === conversationId);
-        console.log('Conv -> ', Conv);
+        console.log("Conv -> ", Conv);
         const { recipients } = m;
         const otherRecipient = recipients.find(recipient => {
-          console.log('recipient -> ', recipient);
-          console.log('Me => ', Me);
+          console.log("recipient -> ", recipient);
+          console.log("Me => ", Me);
           if (recipient.id.toString() !== Me.id.toString()) {
             return recipient;
           }
@@ -70,8 +70,8 @@ class Conversation extends PureComponent {
           Me,
           otherRecipient
         });
-        console.log('Navigation merge options!', otherRecipient.name);
-        Navigation.mergeOptions('Conversation', {
+        console.log("Navigation merge options!", otherRecipient.name);
+        Navigation.mergeOptions("Conversation", {
           topBar: {
             title: {
               text: otherRecipient.name
@@ -80,7 +80,7 @@ class Conversation extends PureComponent {
         });
       }
     } catch (e) {
-      console.log('error -> ', e);
+      console.log("error -> ", e);
       this.setState({
         error: true
       });
@@ -136,55 +136,56 @@ class Conversation extends PureComponent {
       <Animated.View
         style={{
           flex: 1,
-          backgroundColor: '#ffffff',
+          backgroundColor: "#ffffff",
           paddingBottom: this.keyboardHeight
         }}
       >
         {error ? (
           <View />
         ) : (
-            <Query
-              fetchPolicy={'cache-and-network'}
-              query={FindConversation}
-              variables={{ id: props.conversationId }}
-            >
-              {({ loading, error, data }) => {
-                if (loading) {
-                  console.log('Loading!');
-                }
-                if (error) {
-                  console.log('Error ->', error);
-                }
-                console.log('data -> ', data);
-                const conversation = data.feed[0];
-                const { messages } = conversation;
-                return (
-                  <View style={{ flex: 1, backgroundColor: '#f1f1f4' }}>
-                    {messages && messages.length ? (
-                      <FlatList
-                        initialNumToRender={10}
-                        onScroll={handleScroll}
-                        ref={ref => (this.flatListRef = ref)}
-                        ListEmptyComponent={this.ConversationZeroState}
-                        ListFooterComponent={renderFooter()}
-                        onContentSizeChange={event => {
-                          this.flatListRef.scrollToEnd({ animated: true });
-                        }}
-                        onLayout={event => {
-                          this.flatListRef.scrollToEnd({ animated: true });
-                        }}
-                        data={messages}
-                        renderItem={({ item }) => (
-                          <ConversationBubble message={item} me={Me} />
-                        )}
-                        keyExtractor={this.keyExtractor}
-                      />
-                    ) : null}
-                  </View>
-                );
-              }}
-            </Query>
-          )}
+          <Query
+            fetchPolicy={"cache-and-network"}
+            query={FindConversation}
+            variables={{ id: props.conversationId }}
+          >
+            {({ loading, error, data }) => {
+              if (loading) {
+                console.log("Loading!");
+              }
+              if (error) {
+                console.log("Error ->", error);
+              }
+              console.log("data -> ", data);
+              const conversation = data.feed[0];
+              const { messages } = conversation;
+              return (
+                <View style={{ flex: 1, backgroundColor: "#f1f1f4" }}>
+                  {messages && messages.length ? (
+                    <FlatList
+                      refreshing={true}
+                      initialNumToRender={10}
+                      onScroll={handleScroll}
+                      ref={ref => (this.flatListRef = ref)}
+                      ListEmptyComponent={this.ConversationZeroState}
+                      ListFooterComponent={renderFooter()}
+                      onContentSizeChange={event => {
+                        this.flatListRef.scrollToEnd({ animated: true });
+                      }}
+                      onLayout={event => {
+                        this.flatListRef.scrollToEnd({ animated: true });
+                      }}
+                      data={messages}
+                      renderItem={({ item }) => (
+                        <ConversationBubble message={item} me={Me} />
+                      )}
+                      keyExtractor={this.keyExtractor}
+                    />
+                  ) : null}
+                </View>
+              );
+            }}
+          </Query>
+        )}
         <ConversationInput
           otherRecipient={otherRecipient}
           onChangeText={onMessageTextChange}

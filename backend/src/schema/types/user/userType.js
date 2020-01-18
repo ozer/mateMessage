@@ -8,7 +8,7 @@ import { resolveCursor } from '../../schemaHelper/connectionHelper';
 const userType = new GraphQLObjectType({
   name: 'User',
   isTypeOf: obj => {
-   if (!obj.isViewer) {
+   if (obj instanceof User) {
      return obj;
    }
   },

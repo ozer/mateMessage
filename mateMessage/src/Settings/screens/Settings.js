@@ -4,7 +4,7 @@ import React, {
   TouchableOpacity,
   View
 } from 'react-native';
-import { wsLink } from '../../../index';
+import { cachePersistor, wsLink } from '../../../index';
 import { goAuth } from '../../../navigation';
 import { useApolloClient } from '@apollo/react-hooks';
 import { useCallback } from 'react';
@@ -22,7 +22,7 @@ const Settings = () => {
     // Remove token from AsyncStorage.
     await AsyncStorage.removeItem('token');
     // Clear the cache.
-    await apolloClient.clearStore();
+    await cachePersistor.purge();
     // Go Auth.
     return goAuth();
   }, [apolloClient]);

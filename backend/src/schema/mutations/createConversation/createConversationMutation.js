@@ -1,6 +1,9 @@
 import { GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
-import { sendMessageToRecipients } from '../../subscriptions';
+import {
+  sendConversationToRecipients,
+  sendMessageToRecipients
+} from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
@@ -35,11 +38,18 @@ const resolve = async (_, args, context) => {
       select: ['email', 'name']
     })
     .execPopulate();
-  sendMessageToRecipients({
+
+  const base64 = Buffer.from(`Conversation:${newConversation.id}`).toString(
+    'base64'
+  );
+
+  sendConversationToRecipients({
+    id: newConversation.id,
+    conversationId: newConversation.id,
     recipients: newConversation.recipients,
-    senderId: user.id,
-    conversationId: newConversation.id
+    messages: []
   });
+
   return newConversation;
 };
 

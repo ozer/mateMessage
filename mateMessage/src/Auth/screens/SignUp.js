@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Navigation } from 'react-native-navigation';
 import {
   Alert,
-  AsyncStorage,
   KeyboardAvoidingView,
   ScrollView,
   Text,
@@ -10,10 +9,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { setToken, wsLink } from '../../../index';
 import { goHome } from '../../../navigation';
+import { handleAuthFormSubmit } from '../authHelper';
+import SignIn from './SignIn';
 
-const SignUp = () => {
+const SignUp = ({ componentId }) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -34,10 +34,8 @@ const SignUp = () => {
       console.log('response: ', response);
       if (response) {
         const { user } = response;
-        const { jwt } = user;
-        setToken(jwt);
-        await AsyncStorage.setItem('token', jwt);
-        await wsLink.subscriptionClient.connect();
+        const { jwt: token } = user;
+        await handleAuthFormSubmit({ token });
         setLoading(false);
         return goHome();
       }
@@ -48,16 +46,16 @@ const SignUp = () => {
     }
   }, [username, password]);
 
-  const goToSignIn = () =>
-    Navigation.setStackRoot('Auth.Stack', {
+  const goToSignIn = useCallback(async () => {
+    await Navigation.setStackRoot(componentId, {
       component: {
         name: 'Auth.SignIn',
         options: {
           animations: {
             setRoot: {
               alpha: {
-                from: 0,
-                to: 1,
+                from: 1,
+                to: 0,
                 duration: 2500,
                 interpolation: 'accelerate'
               }
@@ -66,6 +64,7 @@ const SignUp = () => {
         }
       }
     });
+  }, [componentId]);
 
   return (
     <View style={{ backgroundColor: 'white', flex: 1 }}>
@@ -186,5 +185,12 @@ const SignUp = () => {
     </View>
   );
 };
+
+SignUp.options = () => ({
+  topBar: {
+    visible: false,
+    drawBehind: true,
+  },
+});
 
 export default SignUp;

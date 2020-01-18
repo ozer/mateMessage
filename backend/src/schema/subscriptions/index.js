@@ -6,6 +6,7 @@ import {
   GraphQLBoolean
 } from 'graphql';
 import messageType from '../types/message/messageType';
+import conversationType from '../types/conversation/conversationType';
 const pubSub = new PubSub();
 
 export const sendIsTypingToRecipients = ({
@@ -35,7 +36,6 @@ export const sendMessageToRecipients = ({
   content,
   recipients
 }) => {
-  console.log('recipients ', recipients);
   for (const recipient of recipients) {
     if (senderId !== recipient.id) {
       publishMessage({
@@ -45,6 +45,29 @@ export const sendMessageToRecipients = ({
         senderId,
         recipientId: recipient.id,
         content
+      });
+    }
+  }
+};
+
+export const sendConversationToRecipients = ({
+  id,
+  conversationId,
+  senderId,
+  title,
+  messages,
+  recipients
+}) => {
+  for (const recipient of recipients) {
+    if (senderId !== recipient.id) {
+      console.log('publishing conversation ', id);
+      publishConversation({
+        id,
+        conversationId,
+        messages,
+        recipients,
+        title,
+        recipientId: recipient.id
       });
     }
   }
@@ -69,20 +92,53 @@ export const publishMessage = ({
   });
 };
 
+export const publishConversation = ({
+  id,
+  conversationId,
+  recipients,
+  messages,
+  title,
+  recipientId
+}) => {
+  return pubSub.publish(recipientId, {
+    conversationCreated: {
+      id,
+      conversationId,
+      recipients,
+      messages: {
+        __typename: 'MessageConnection',
+        edges: []
+      },
+      title
+    }
+  });
+};
+
 const subscriptions = new GraphQLObjectType({
   name: 'subscription',
   fields: {
+    conversationCreated: {
+      type: conversationType,
+      subscribe: (params, {}, context) => {
+        if (!context.user) {
+          return null;
+        }
+        const { user } = context;
+        console.log('Subscribing to conversationCreated -> ', user.id);
+        const subscriptionPath = user.id;
+        return pubSub.asyncIterator([subscriptionPath]);
+      }
+    },
     messageCreated: {
       type: messageType,
       subscribe: (params, {}, context) => {
-        console.log('messageCreated Subscribed');
-        if (context && context.user) {
-          const { user } = context;
-          console.log('Subscribing to messageCreated -> ', user.id);
-          const subscriptionPath = user.id;
-          return pubSub.asyncIterator([subscriptionPath]);
+        if (!context.user) {
+          return null;
         }
-        return null;
+        const { user } = context;
+        console.log('Subscribing to messageCreated -> ', user.id);
+        const subscriptionPath = user.id;
+        return pubSub.asyncIterator([subscriptionPath]);
       }
     },
     isTyping: {

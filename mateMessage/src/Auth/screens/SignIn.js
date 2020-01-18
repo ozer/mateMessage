@@ -9,10 +9,11 @@ import {
   Alert
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
-import { setToken, wsLink } from '../../../index';
+import { wsLink } from '../../../index';
 import { goHome } from '../../../navigation';
+import { handleAuthFormSubmit } from '../authHelper';
 
-const SignIn = () => {
+const SignIn = ({ componentId }) => {
   const [username, setUsername] = useState('ozer');
   const [password, setPassword] = useState('123456');
   const [loading, setLoading] = useState(false);
@@ -31,10 +32,8 @@ const SignIn = () => {
       console.log('response: ', response);
       if (response) {
         const { user } = response;
-        const { jwt } = user;
-        setToken(jwt);
-        await AsyncStorage.setItem('token', jwt);
-        await wsLink.subscriptionClient.connect();
+        const { jwt: token } = user;
+        await handleAuthFormSubmit({ token });
         setLoading(false);
         return goHome();
       }
@@ -45,8 +44,8 @@ const SignIn = () => {
     }
   }, [username, password]);
 
-  const goToSignUp = () =>
-    Navigation.setStackRoot('Auth.Stack', {
+  const goToSignUp = useCallback(async () => {
+    await Navigation.setStackRoot(componentId, {
       component: {
         name: 'Auth.SignUp',
         options: {
@@ -63,6 +62,7 @@ const SignIn = () => {
         }
       }
     });
+  }, [componentId]);
 
   return (
     <View style={{ backgroundColor: 'white', flex: 1 }}>
@@ -143,5 +143,12 @@ const SignIn = () => {
     </View>
   );
 };
+
+SignIn.options = () => ({
+  topBar: {
+    visible: false,
+    drawBehind: true,
+  },
+});
 
 export default SignIn;

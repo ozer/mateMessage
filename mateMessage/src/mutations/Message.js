@@ -1,20 +1,23 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 export const CreateConversation = gql`
-  mutation CreateConversation($receiverId: String!) {
-    createConversation(receiverId: $receiverId) {
-      state
-      conversationData {
+  mutation CreateConversation($recipientId: String!) {
+    createConversation(recipientId: $recipientId) {
+      id
+      conversationId
+      title
+      recipients {
         id
-        recipients {
-          id
-          name
-        }
-        messages {
-          id
-          content
-          sender {
+        name
+      }
+      messages {
+        edges {
+          node {
             id
+            messageId
+            senderId
+            conversationId
+            content
           }
         }
       }

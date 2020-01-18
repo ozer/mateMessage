@@ -61,31 +61,41 @@ const viewerType = new GraphQLObjectType({
         console.log('Fetching feed!', args);
         if (context && context.user) {
           const { user } = context;
-          const feed = await Conversation.aggregate([
-            {
-              $match: {
-                recipients: {
-                  $in: [mongoose.Types.ObjectId(user.id)]
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: 'Message',
-                localField: '_id',
-                foreignField: 'conversationId',
-                as: 'messages'
-              }
-            },
-            {
-              $lookup: {
-                from: 'User',
-                localField: 'recipients',
-                foreignField: '_id',
-                as: 'recipients'
-              }
+
+          const feed = await Conversation.find({
+            recipients: {
+              $in: [user.id]
             }
-          ]);
+          });
+
+          // const feed = await Conversation.aggregate([
+          //   {
+          //     $match: {
+          //       recipients: {
+          //         $in: [mongoose.Types.ObjectId(user.id)]
+          //       }
+          //     }
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'Message',
+          //       localField: '_id',
+          //       foreignField: 'conversationId',
+          //       as: 'messages'
+          //     }
+          //   },
+          //   {
+          //     $lookup: {
+          //       from: 'User',
+          //       localField: 'recipients',
+          //       foreignField: '_id',
+          //       as: 'recipients'
+          //     }
+          //   },
+          //   {
+          //     $sort: { 'message._id': -1 }
+          //   }
+          // ]);
 
           return connectionFromArray(feed.map(getConversation), args);
         }

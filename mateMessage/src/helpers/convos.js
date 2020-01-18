@@ -1,12 +1,12 @@
-import get from "lodash.get";
+import get from 'lodash.get';
 
 export const getConvoInitials = convo => {
-  return convo && convo.title ? convo.title : "CO";
+  return convo && convo.title ? convo.title : 'CO';
 };
 
 export const getChatTitleByRecipients = recipients => {
   if (!recipients.length) {
-    return "Chat";
+    return 'Chat';
   }
 
   if (recipients.length === 1) {
@@ -14,15 +14,15 @@ export const getChatTitleByRecipients = recipients => {
     return recipient.name;
   }
 
-  return recipients.map(recipient => recipient.name).join(",");
+  return recipients.map(recipient => recipient.name).join(',');
 };
 
 export const getChatSubtitle = messages => {
-  const edges = get(messages, "edges") || [];
+  const edges = get(messages, 'edges') || [];
   if (!edges.length) {
     return `Say 'Hi!'`;
   }
 
-  const lastMessage = edges[edges.length - 1];
+  const lastMessage = edges[0];
   return lastMessage.node.content;
 };

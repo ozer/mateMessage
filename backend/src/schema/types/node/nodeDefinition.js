@@ -22,14 +22,15 @@ const getMessage = async messageId => {
 };
 
 const getConversation = async conversationId => {
-  console.log('getConversation!');
-  return Conversation.findById(conversationId);
+  console.log('getConversation!', conversationId);
+  const conversation = await Conversation.findById(conversationId);
+  conversation.isConversation = true;
+  return conversation;
 };
 
 export const { nodeInterface, nodeField } = nodeDefinitions(async globalId => {
   const { type, id } = fromGlobalId(globalId);
-  console.log('id ->  ', id);
-  console.log('type -> ', type);
+  console.log('nodeDefinition: id -> ', id, ' type -> ', type);
   if (type === 'Viewer') {
     return getViewer(id);
   }

@@ -14,12 +14,14 @@
   "dependencies": {
     "apollo-server-express": "^2.4.3",
     "babel-register": "^6.26.0",
-    "body-parser": "^1.18.3",
-    "graphql-relay": "0.6.0",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
+    "graphql-relay": "0.6.0",
+    "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.0",
+    "lodash": "^4.17.15",
     "mongoose": "5.8.1",
     "subscriptions-transport-ws": "^0.9.15",
     "uuid": "^3.3.2"
@@ -41,7 +43,6 @@
     "graphql-tag": "^2.10.1",
     "mocha": "^6.2.0",
     "nodemon": "^1.18.10",
-    "prettier": "1.19.1",
     "supertest": "^4.0.2"
   },
   "babel": {

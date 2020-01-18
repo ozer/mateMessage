@@ -1,33 +1,38 @@
-import React, { memo, useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 import {
   View,
   TextInput,
   StyleSheet,
   TouchableOpacity,
   Text
-} from "react-native";
-import { encode as btoa } from "base-64";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
-import { SendMessage } from "../../mutations/Message";
+} from 'react-native';
+import { encode as btoa } from 'base-64';
+import { useMutation, useQuery } from '@apollo/react-hooks';
+import gql from 'graphql-tag';
+import get from 'lodash.get';
+import { SendMessage } from '../../mutations/Message';
+import { Viewer } from '../../queries/Viewer';
 
 const ConversationInput = ({ conversationId }) => {
-  const [content, changeText] = useState("");
+  const [content, changeText] = useState('');
 
-  const [
-    sendMessage,
-    { loading: mutationLoading, error: mutationError }
-  ] = useMutation(SendMessage, {
+  // read userId from the cache.
+  const {
+    data: { viewer }
+  } = useQuery(Viewer, { fetchPolicy: 'cache-only' });
+  const userId = get(viewer, 'userId') || '';
+
+  const [sendMessage] = useMutation(SendMessage, {
     variables: { content, conversationId },
     onError: err => {
-      console.log("SendMessage Mutation Error: [", err, "]");
+      console.log('SendMessage Mutation Error: [', err, ']');
     },
     optimisticResponse: {
       sendMessage: {
-        __typename: "Message",
+        __typename: 'Message',
         id: new Date().getTime().toString(),
         messageId: new Date().getTime().toString(),
-        senderId: "5debbf8682140b15dfa46d15",
+        senderId: userId,
         conversationId,
         content,
         isOptimistic: true
@@ -36,14 +41,17 @@ const ConversationInput = ({ conversationId }) => {
     update: (cache, { data }) => {
       const isOptimistic = data.sendMessage.isOptimistic;
       const encodedConversationId = btoa(`Conversation:${conversationId}`);
-      console.log("isOptimistic -> ", isOptimistic);
-      console.log("update!!", data);
       const convo = cache.readFragment({
         id: encodedConversationId,
         fragment: gql`
           fragment ConversationInputConversation on Conversation {
             id
             conversationId
+            title
+            recipients {
+              id
+              name
+            }
             messages {
               edges {
                 node {
@@ -64,17 +72,17 @@ const ConversationInput = ({ conversationId }) => {
       const newMessage = {
         node: {
           id: data.sendMessage.id,
-          __typename: "Message",
+          __typename: 'Message',
           messageId: data.sendMessage.messageId,
           senderId: data.sendMessage.senderId,
           conversationId,
           content: data.sendMessage.content,
           onFlight: !!isOptimistic
         },
-        __typename: "MessageEdge"
+        __typename: 'MessageEdge'
       };
 
-      convo.messages.edges.push(newMessage);
+      convo.messages.edges.unshift(newMessage);
 
       return cache.writeFragment({
         id: encodedConversationId,
@@ -82,6 +90,11 @@ const ConversationInput = ({ conversationId }) => {
           fragment ConversationInputConversation on Conversation {
             id
             conversationId
+            title
+            recipients {
+              id
+              name
+            }
             messages {
               edges {
                 node {
@@ -103,8 +116,8 @@ const ConversationInput = ({ conversationId }) => {
   });
 
   const onPressSend = useCallback(() => {
-    changeText("");
-    return sendMessage({ content, conversationId });
+    changeText('');
+    return sendMessage();
   }, [content, conversationId, changeText]);
 
   return (
@@ -126,12 +139,12 @@ const ConversationInput = ({ conversationId }) => {
 
 const styles = StyleSheet.create({
   footer: {
-    flexDirection: "row",
-    backgroundColor: "#f1f1f4",
+    flexDirection: 'row',
+    backgroundColor: '#f1f1f4',
     paddingBottom: 20,
-    borderStyle: "solid",
+    borderStyle: 'solid',
     borderTopWidth: 1,
-    borderTopColor: "gray"
+    borderTopColor: 'gray'
   },
   input: {
     marginVertical: 10,
@@ -141,12 +154,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     flex: 1,
     lineHeight: 20,
-    backgroundColor: "#ffffff"
+    backgroundColor: '#ffffff'
   },
   send: {
-    alignSelf: "center",
-    color: "lightseagreen",
-    fontWeight: "bold",
+    alignSelf: 'center',
+    color: 'lightseagreen',
+    fontWeight: 'bold',
     padding: 16
   }
 });
