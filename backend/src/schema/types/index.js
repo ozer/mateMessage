@@ -45,53 +45,6 @@ const RootQuery = new GraphQLObjectType({
 
         return connectionFromArray(users.map(getUserFromConnection), {});
       }
-    },
-    feed: {
-      type: conversationConnection,
-      args: connectionArgs,
-      resolve: async (parentValue, args, context) => {
-        if (!context.user) {
-          return null;
-        }
-        const { user } = context;
-        const feed = await Conversation.aggregate([
-          {
-            $match: {
-              recipients: {
-                $in: [mongoose.Types.ObjectId(user.id)]
-              }
-            }
-          },
-          {
-            $lookup: {
-              from: 'Message',
-              localField: '_id',
-              foreignField: 'conversationId',
-              as: 'messages'
-            }
-          },
-          {
-            $lookup: {
-              from: 'User',
-              localField: 'recipients',
-              foreignField: '_id',
-              as: 'recipients'
-            }
-          }
-        ]);
-
-        return feed;
-      }
-    },
-    isTokenAuthenticated: {
-      type: userType,
-      resolve(parentValue, _, context) {
-        if (context && context.state && context.user) {
-          const { user } = context;
-          return user;
-        }
-        return null;
-      }
     }
   })
 });

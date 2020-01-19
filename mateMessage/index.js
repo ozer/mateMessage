@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SplashScreen from './src/SplashScreen';
 import { registerScreens } from './screens';
 import { cachePersistor } from './src/apollo/cache';
+import moment from 'moment';
 
 const startApp = async () => {
   registerScreens();
@@ -18,6 +19,7 @@ const startApp = async () => {
   });
   await NetInfo.fetch();
   await Icon.loadFont();
+  moment.locale('en');
   await cachePersistor.restore();
   return Navigation.events().registerAppLaunchedListener(() => {
     return Navigation.setRoot({

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { encode as btoa } from 'base-64';
 import gql from 'graphql-tag';
-import { useMutation, useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/react-hooks';
 import { Avatar } from 'react-native-elements';
 import { Navigation } from 'react-native-navigation';
 import { ThemeProvider } from 'emotion-theming';
@@ -11,7 +11,6 @@ import StyledText from '../../UI/StyledText';
 import StyledView from '../../UI/StyledView';
 import { theme } from '../../theme/theme';
 import { getInitials } from '../../helpers/mates';
-import { CreateConversation } from '../../mutations/Message';
 
 const MatePreview = ({ componentId, userId }) => {
   const {

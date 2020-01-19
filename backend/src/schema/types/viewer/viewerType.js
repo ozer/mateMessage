@@ -66,35 +66,6 @@ const viewerType = new GraphQLObjectType({
             }
           });
 
-          // const feed = await Conversation.aggregate([
-          //   {
-          //     $match: {
-          //       recipients: {
-          //         $in: [mongoose.Types.ObjectId(user.id)]
-          //       }
-          //     }
-          //   },
-          //   {
-          //     $lookup: {
-          //       from: 'Message',
-          //       localField: '_id',
-          //       foreignField: 'conversationId',
-          //       as: 'messages'
-          //     }
-          //   },
-          //   {
-          //     $lookup: {
-          //       from: 'User',
-          //       localField: 'recipients',
-          //       foreignField: '_id',
-          //       as: 'recipients'
-          //     }
-          //   },
-          //   {
-          //     $sort: { 'message._id': -1 }
-          //   }
-          // ]);
-
           return connectionFromArray(feed.map(getConversation), args);
         }
         return null;

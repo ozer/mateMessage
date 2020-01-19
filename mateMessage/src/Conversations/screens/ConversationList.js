@@ -74,6 +74,7 @@ const ConversationList = ({ componentId }) => {
           senderId: messageCreated.senderId,
           conversationId: convoId,
           content: messageCreated.content,
+          created_at: messageCreated.created_at,
           onFlight: false
         };
 

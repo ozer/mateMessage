@@ -18,6 +18,7 @@ export const CreateConversation = gql`
             senderId
             conversationId
             content
+            created_at  
           }
         }
       }
@@ -26,13 +27,14 @@ export const CreateConversation = gql`
 `;
 
 export const SendMessage = gql`
-  mutation SendMessage($content: String!, $conversationId: String) {
-    sendMessage(content: $content, conversationId: $conversationId) {
+  mutation SendMessage($content: String!, $conversationId: String!, $created: String!) {
+    sendMessage(content: $content, conversationId: $conversationId, created: $created) {
       id
       messageId
       conversationId
       senderId
       content
+      created_at  
       __typename
     }
   }

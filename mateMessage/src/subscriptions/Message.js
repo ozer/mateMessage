@@ -18,6 +18,7 @@ export const ConversationCreated = gql`
             conversationId
             senderId
             content
+            created_at  
             onFlight @client
           }
         }
@@ -30,8 +31,8 @@ export const MessageCreated = gql`
   subscription MessageCreated {
     messageCreated {
       id
-      senderId
       messageId
+      senderId
       conversationId
       content
       created_at

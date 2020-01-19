@@ -23,7 +23,7 @@ const ConversationInput = ({ conversationId }) => {
   const userId = get(viewer, 'userId') || '';
 
   const [sendMessage] = useMutation(SendMessage, {
-    variables: { content, conversationId },
+    variables: { content, conversationId, created: new Date() },
     onError: err => {
       console.log('SendMessage Mutation Error: [', err, ']');
     },
@@ -32,6 +32,7 @@ const ConversationInput = ({ conversationId }) => {
         __typename: 'Message',
         id: new Date().getTime().toString(),
         messageId: new Date().getTime().toString(),
+        created_at: new Date(),
         senderId: userId,
         conversationId,
         content,
@@ -40,6 +41,9 @@ const ConversationInput = ({ conversationId }) => {
     },
     update: (cache, { data }) => {
       const isOptimistic = data.sendMessage.isOptimistic;
+      if (!isOptimistic) {
+        console.log('data.sendMessage: ', data.sendMessage);
+      }
       const encodedConversationId = btoa(`Conversation:${conversationId}`);
       const convo = cache.readFragment({
         id: encodedConversationId,
@@ -61,6 +65,7 @@ const ConversationInput = ({ conversationId }) => {
                   senderId
                   conversationId
                   content
+                  created_at
                   onFlight @client
                 }
               }
@@ -77,6 +82,7 @@ const ConversationInput = ({ conversationId }) => {
           senderId: data.sendMessage.senderId,
           conversationId,
           content: data.sendMessage.content,
+          created_at: data.sendMessage.created_at,
           onFlight: !!isOptimistic
         },
         __typename: 'MessageEdge'
@@ -104,6 +110,7 @@ const ConversationInput = ({ conversationId }) => {
                   senderId
                   conversationId
                   content
+                  created_at
                   onFlight @client
                 }
               }

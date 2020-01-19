@@ -32,7 +32,10 @@ const conversationType = new GraphQLObjectType({
       resolve: idMapping
     },
     title: {
-      type: GraphQLString
+      type: GraphQLString,
+      resolve: (parent, _, context) => {
+        return parent.title;
+      },
     },
     avatar: {
       type: GraphQLString

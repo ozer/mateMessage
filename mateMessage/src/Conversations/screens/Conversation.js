@@ -106,6 +106,7 @@ const Conversation = ({ conversationId, componentId }) => {
           content={node.content}
           onFlight={node.onFlight}
           self={node.senderId === userId}
+          created_at={node.created_at}
         />
       );
     },
@@ -163,6 +164,7 @@ export const ConversationFragments = {
             conversationId
             senderId
             content
+            created_at
             onFlight @client
             __typename
           }

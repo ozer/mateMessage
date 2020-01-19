@@ -34,7 +34,8 @@ export const sendMessageToRecipients = ({
   conversationId,
   senderId,
   content,
-  recipients
+  recipients,
+  created_at
 }) => {
   for (const recipient of recipients) {
     if (senderId !== recipient.id) {
@@ -44,7 +45,8 @@ export const sendMessageToRecipients = ({
         conversationId,
         senderId,
         recipientId: recipient.id,
-        content
+        content,
+        created_at
       });
     }
   }
@@ -79,7 +81,8 @@ export const publishMessage = ({
   conversationId,
   senderId,
   recipientId,
-  content
+  content,
+  created_at
 }) => {
   return pubSub.publish(recipientId, {
     messageCreated: {
@@ -87,7 +90,8 @@ export const publishMessage = ({
       messageId,
       conversationId,
       content,
-      senderId
+      senderId,
+      created_at
     }
   });
 };
