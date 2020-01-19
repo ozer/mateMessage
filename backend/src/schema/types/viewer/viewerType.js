@@ -4,7 +4,6 @@ import {
   connectionFromArray,
   connectionArgs
 } from 'graphql-relay';
-import mongoose from 'mongoose';
 import { nodeInterface } from '../node/nodeDefinition';
 import { userConnection } from '../user/userType';
 import { conversationConnection } from '../conversation/conversationType';
@@ -58,7 +57,6 @@ const viewerType = new GraphQLObjectType({
       type: conversationConnection,
       args: connectionArgs,
       resolve: async (parentValue, args, context) => {
-        console.log('Fetching feed!', args);
         if (context && context.user) {
           const { user } = context;
 

@@ -4,12 +4,10 @@ import {
   ScrollView,
   Text,
   TextInput,
-  AsyncStorage,
   TouchableOpacity,
   Alert
 } from 'react-native';
 import { Navigation } from 'react-native-navigation';
-import { wsLink } from '../../../index';
 import { goHome } from '../../../navigation';
 import { handleAuthFormSubmit } from '../authHelper';
 

@@ -38,15 +38,11 @@ const Conversation = ({ conversationId, componentId }) => {
       'keyboardWillHide',
       keyboardWillHide
     );
-    const otherRecipient = conversationFromCache.recipients
-      .filter(recipient => recipient.id !== userId)
-      .map(recipient => recipient.name)
-      .join(',');
 
     Navigation.mergeOptions(componentId, {
       topBar: {
         title: {
-          text: otherRecipient
+          text: 'otherRecipient'
         }
       }
     });
@@ -55,14 +51,7 @@ const Conversation = ({ conversationId, componentId }) => {
       keyboardWillShowEventListener.remove();
       keyboardWillHideEventListener.remove();
     };
-  }, [
-    keyboardWillShow,
-    keyboardWillHide,
-    conversationFromCache,
-    componentId,
-    userId
-  ]);
-  const apolloClient = useApolloClient();
+  }, [keyboardWillShow, keyboardWillHide, componentId]);
 
   const {
     data: { viewer }
@@ -77,11 +66,6 @@ const Conversation = ({ conversationId, componentId }) => {
     `,
     { fetchPolicy: 'cache-only', returnPartialData: true }
   );
-
-  const conversationFromCache = apolloClient.readFragment({
-    fragment: ConversationFragments.conversation,
-    id: btoa(`Conversation:${conversationId}`)
-  });
 
   const {
     data: { node },
@@ -101,13 +85,12 @@ const Conversation = ({ conversationId, componentId }) => {
     {
       variables: {
         id: btoa(`Conversation:${conversationId}`)
-      },
+      }
     }
   );
 
   const userId = get(viewer, 'userId');
 
-  const messageEdgesFromCache = get(conversationFromCache, 'messages.edges');
   const messageEdges = get(node, 'messages.edges') || [];
 
   const EmptyList = () => (
@@ -129,7 +112,7 @@ const Conversation = ({ conversationId, componentId }) => {
     [userId]
   );
 
-  if (!messageEdges.length && !messageEdgesFromCache.length && loading) {
+  if (!messageEdges.length && loading) {
     return (
       <View>
         <Text>Loading...</Text>
@@ -151,7 +134,7 @@ const Conversation = ({ conversationId, componentId }) => {
         initialNumToRender={10}
         ListEmptyComponent={EmptyList}
         keyExtractor={item => item.node.messageId}
-        data={messageEdges.length ? messageEdges : messageEdgesFromCache}
+        data={messageEdges}
         renderItem={renderItem}
         onEndReached={() => console.log('reached to the end!')}
         inverted

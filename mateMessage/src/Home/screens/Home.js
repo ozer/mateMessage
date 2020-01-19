@@ -7,8 +7,12 @@ import { Navigation } from "react-native-navigation";
 import HomeHeader from "../../UI/HomeHeader";
 import { getInitials } from "../../helpers/mates";
 import { SafeAreaView } from "react-native";
+import NetworkStatusBar from '../../UI/NetworkStatusBar';
+import { useNetInfo } from '@react-native-community/netinfo';
 
-const Home = ({ componentId }) => {
+const Home = () => {
+  const { isInternetReachable, isConnected } = useNetInfo();
+
   const {
     data: { viewer },
     loading
@@ -19,6 +23,7 @@ const Home = ({ componentId }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <NetworkStatusBar visible={!isInternetReachable || !isConnected} />
       <StyledView marginTop={32}>
         <HomeHeader name={name} initials={initials} />
       </StyledView>

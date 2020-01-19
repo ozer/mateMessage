@@ -1,17 +1,10 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  FlatList,
-  ScrollView,
-  TextInput
-} from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, FlatList } from 'react-native';
 import { useQuery, useSubscription } from '@apollo/react-hooks';
-import { Navigation } from 'react-native-navigation';
 import gql from 'graphql-tag';
 import get from 'lodash.get';
 import { encode as btoa } from 'base-64';
+import { useNetInfo } from '@react-native-community/netinfo';
 import {
   ConversationCreated,
   MessageCreated
@@ -23,6 +16,7 @@ import {
 } from '../../helpers/convos';
 import { ConversationFragments } from './Conversation';
 import { navigateToConversation } from '../navHelper';
+import NetworkStatusBar from '../../UI/NetworkStatusBar';
 
 const ConversationListZeroStateComponent = () => {
   return (
@@ -33,6 +27,8 @@ const ConversationListZeroStateComponent = () => {
 };
 
 const ConversationList = ({ componentId }) => {
+  const { isInternetReachable, isConnected } = useNetInfo();
+
   const goToConversation = useCallback(
     conversationId => {
       return navigateToConversation({ componentId, conversationId });
@@ -42,9 +38,13 @@ const ConversationList = ({ componentId }) => {
 
   const {
     loading,
-    error,
     data: { viewer }
-  } = useQuery(ConversationListQuery, { returnPartialData: true });
+  } = useQuery(ConversationListQuery, {
+    returnPartialData: true,
+    onError: e => {
+      console.log('error: ', e);
+    }
+  });
   const feedEdges = get(viewer, 'feed.edges');
 
   useSubscription(MessageCreated, {
@@ -134,14 +134,6 @@ const ConversationList = ({ componentId }) => {
     );
   }
 
-  if (error) {
-    return (
-      <View>
-        <Text>Error Occurred</Text>
-      </View>
-    );
-  }
-
   const renderItem = ({ item: { node } }) => {
     const conversationId = get(node, 'conversationId') || '';
     const title = get(node, 'title') || '';
@@ -159,7 +151,7 @@ const ConversationList = ({ componentId }) => {
   };
   return (
     <View style={{ flex: 1 }}>
-      {/*<TextInput style={{ width: 50, height: 50, }} placeholder={'hey'} onChange={changeText} />*/}
+      <NetworkStatusBar visible={!isInternetReachable || !isConnected} />
       <FlatList
         ListEmptyComponent={ConversationListZeroStateComponent}
         data={feedEdges}

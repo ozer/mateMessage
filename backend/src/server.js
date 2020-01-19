@@ -72,6 +72,7 @@ export const initializeServer = async () => {
       return { state: false, user: null };
     },
     subscriptions: {
+      path: '/api/graphql',
       onConnect: (connectionParams, webSocket) => {
         console.log('onConnect: ', connectionParams);
         if (connectionParams.authToken) {
@@ -102,7 +103,7 @@ export const initializeServer = async () => {
   httpServer = http.createServer(app);
   httpServer.listen = promisify(httpServer.listen);
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, path: '/api/graphql' });
   apolloServer.installSubscriptionHandlers(httpServer);
 
   await httpServer.listen(PORT);

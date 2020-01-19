@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/ozercevikaslan/mateMessage/tree/master.svg?style=svg)](https://circleci.com/gh/ozercevikaslan/mateMessage/tree/master)
+[![CircleCI](https://circleci.com/gh/ozer/mateMessage/tree/master.svg?style=svg)](https://circleci.com/gh/ozercevikaslan/mateMessage/tree/master)
 
 # mateMessage 😎
 ## Messaging application built with GraphQL and React Native
@@ -38,3 +38,4 @@
 
 ## Future work:
 * Relay pagination will be implemented to work with MongoDB.
+* UI for creating a group conversation.

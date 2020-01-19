@@ -13,6 +13,7 @@
     "@emotion/native": "^10.0.22",
     "@expo/react-native-action-sheet": "^3.4.1",
     "@react-native-community/blur": "^3.4.1",
+    "@react-native-community/netinfo": "^5.3.3",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.6.4",

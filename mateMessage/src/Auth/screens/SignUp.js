@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Navigation } from 'react-native-navigation';
 import {
   Alert,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { goHome } from '../../../navigation';
 import { handleAuthFormSubmit } from '../authHelper';
-import SignIn from './SignIn';
 
 const SignUp = ({ componentId }) => {
   const [email, setEmail] = useState('');

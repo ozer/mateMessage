@@ -162,8 +162,8 @@ export const goHome = () =>
               children: [
                 {
                   component: {
-                    name: 'navigation.playground.Settings',
-                    id: 'SettingsTab',
+                    name: 'Settings',
+                    id: 'Settings',
                     options: {
                       topBar: {
                         title: {

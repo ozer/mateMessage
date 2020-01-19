@@ -1,7 +1,7 @@
 import { AsyncStorage } from 'react-native';
-import { wsLink } from '../../index';
+import { wsClient } from '../apollo/links/ws';
 
 export const handleAuthFormSubmit = async ({ token }) => {
   await AsyncStorage.setItem('token', token);
-  await wsLink.subscriptionClient.connect();
+  await wsClient.connect();
 };

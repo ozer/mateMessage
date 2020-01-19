@@ -1,27 +1,27 @@
-import React, {
+import React, { useCallback } from 'react';
+import {
   AsyncStorage,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import { cachePersistor, wsLink } from '../../../index';
 import { goAuth } from '../../../navigation';
 import { useApolloClient } from '@apollo/react-hooks';
-import { useCallback } from 'react';
+import { cachePersistor } from '../../apollo/cache';
+import { wsClient } from '../../apollo/links/ws';
 
 const Settings = () => {
   const apolloClient = useApolloClient();
 
   const signOut = useCallback(async () => {
     console.log('signOut');
-    const { props } = this;
-    const { client } = props;
-    console.log('client -> ', client);
     // Close socket connection.
-    wsLink.subscriptionClient.close();
+    wsClient.close();
     // Remove token from AsyncStorage.
     await AsyncStorage.removeItem('token');
-    // Clear the cache.
+    // Clear the store
+    await apolloClient.clearStore();
+    // Clear the cache
     await cachePersistor.purge();
     // Go Auth.
     return goAuth();

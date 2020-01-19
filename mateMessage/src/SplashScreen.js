@@ -22,6 +22,10 @@ const SplashScreen = ({ componentId }) => {
       }
       auth();
     },
+    onError: (e) => {
+      console.log('e', e);
+      return goHome();
+    }
   });
 
   const auth = useCallback(() => {
