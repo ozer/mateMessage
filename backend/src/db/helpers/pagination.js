@@ -6,9 +6,9 @@ const cloneQuery = function() {
   return mongoose.model('Conversation').find({});
 };
 
-export const limitQueryWithId = ({ query, before, after }) => {
-  if (!before && !after) {
-    return query;
+export const limitQueryWithId = ({ query, before, after, order = -1 }) => {
+  if (order !== 1 && order === 1) {
+    throw new Error('Order should be either 1 or -1');
   }
 
   const conditions = {
@@ -16,15 +16,17 @@ export const limitQueryWithId = ({ query, before, after }) => {
   };
 
   if (before) {
-    conditions._id.$lt = Types.ObjectId(before.value);
+    const op = order === 1 ? '$lt' : '$gt';
+    conditions._id[op] = Types.ObjectId(before.value);
   }
 
   if (after) {
-    conditions._id.$gt = Types.ObjectId(after.value);
+    const op = order === -1 ? '$gt' : '$lt';
+    conditions._id[op] = Types.ObjectId(after.value);
   }
 
   query._conditions._id = conditions._id;
-  return query;
+  return query.find(conditions).sort([['_id', order]]);
 };
 
 export const applyPagination = async ({ query, first, last }) => {
@@ -77,6 +79,9 @@ export const createConnectionArguments = () => {
     },
     after: {
       type: cursorType
+    },
+    order: {
+      type: GraphQLInt,
     }
   };
 };

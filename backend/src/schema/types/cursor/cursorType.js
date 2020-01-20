@@ -1,6 +1,8 @@
 import Base64URL from 'base64-url';
 import { GraphQLScalarType, Kind } from 'graphql';
 
+// TODO
+// Use Buffer.from instead this library when you have some time and coffee.
 export function toCursor({ value }) {
   return Base64URL.encode(value.toString());
 }
