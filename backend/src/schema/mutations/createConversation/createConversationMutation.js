@@ -2,7 +2,6 @@ import { GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
 import {
   sendConversationToRecipients,
-  sendMessageToRecipients
 } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 

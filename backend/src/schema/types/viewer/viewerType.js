@@ -1,15 +1,14 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql';
 import {
   globalIdField,
-  connectionFromArray,
-  connectionArgs
 } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
-import { userConnection } from '../user/userType';
-import { conversationConnection } from '../conversation/conversationType';
-import Conversation from '../../../db/models/Conversation';
 import { idMapping } from '../../../helpers/mapping';
-import User from '../../../db/models/User';
+import conversationConnectionType from '../conversation/conversationConnectionType';
+import { findConversations } from '../conversation/conversationMongoHelper';
+import { createConnectionArguments } from '../../../db/helpers/pagination';
+import userConnectionType from '../user/userConnectionType';
+import { findUsers } from '../user/userMongoHelper';
 
 const getConversation = obj => {
   return obj;
@@ -41,36 +40,54 @@ const viewerType = new GraphQLObjectType({
       type: GraphQLString
     },
     mates: {
-      type: userConnection,
-      args: connectionArgs,
+      type: userConnectionType,
+      args: createConnectionArguments(),
       resolve: async (parentVal, args, context) => {
         console.log('resolver of mates');
         if (!context.user) {
           return null;
         }
         const { user } = context;
-        const mates = await User.find({ _id: { $ne: user.id } });
-        return connectionFromArray(mates, args);
+        const queryParams = {
+          _id: { $ne: user.id }
+        };
+        return findUsers(args, queryParams);
       }
     },
     feed: {
-      type: conversationConnection,
-      args: connectionArgs,
-      resolve: async (parentValue, args, context) => {
-        if (context && context.user) {
-          const { user } = context;
-
-          const feed = await Conversation.find({
-            recipients: {
-              $in: [user.id]
-            }
-          });
-
-          return connectionFromArray(feed.map(getConversation), args);
+      type: conversationConnectionType,
+      args: createConnectionArguments(),
+      resolve: (parent, args, context) => {
+        if (!context.user) {
+          return null;
         }
-        return null;
+        const { user } = context;
+        const queryParams = {
+          recipients: {
+            $in: [user.id]
+          }
+        };
+        return findConversations(args, queryParams);
       }
     }
+    // feed: {
+    //   type: conversationConnection,
+    //   args: connectionArgs,
+    //   resolve: async (parentValue, args, context) => {
+    //     if (context && context.user) {
+    //       const { user } = context;
+    //
+    //       const feed = await Conversation.find({
+    //         recipients: {
+    //           $in: [user.id]
+    //         }
+    //       });
+    //
+    //       return connectionFromArray(feed.map(getConversation), args);
+    //     }
+    //     return null;
+    //   }
+    // }
   }),
   interfaces: [nodeInterface]
 });

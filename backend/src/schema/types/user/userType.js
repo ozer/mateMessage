@@ -1,9 +1,8 @@
-import { GraphQLObjectType, GraphQLString, GraphQLID } from 'graphql';
+import { GraphQLObjectType, GraphQLString } from 'graphql';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
-import { globalIdField, connectionDefinitions } from 'graphql-relay';
+import { globalIdField } from 'graphql-relay';
 import User from '../../../db/models/User';
-import { resolveCursor } from '../../schemaHelper/connectionHelper';
 
 const userType = new GraphQLObjectType({
   name: 'User',
@@ -34,11 +33,11 @@ const userType = new GraphQLObjectType({
   interfaces: [nodeInterface]
 });
 
-export const { connectionType: userConnection } = connectionDefinitions({
-  nodeType: userType,
-  resolveCursor: ({ node }) => {
-    return resolveCursor({ type: 'User', id: node._id });
-  },
-});
+// export const { connectionType: userConnection } = connectionDefinitions({
+//   nodeType: userType,
+//   resolveCursor: ({ node }) => {
+//     return resolveCursor({ type: 'User', id: node._id });
+//   },
+// });
 
 export default userType;
