@@ -1,18 +1,15 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList } from 'graphql';
 import {
   globalIdField,
-  connectionArgs,
-  connectionDefinitions,
-  connectionFromArray
 } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
-// import { messageConnection } from '../message/messageType';
 import { idMapping } from '../../../helpers/mapping';
 import Conversation from '../../../db/models/Conversation';
-import { resolveCursor } from '../../schemaHelper/connectionHelper';
 import User from '../../../db/models/User';
-import Message from '../../../db/models/Message';
 import userType from '../user/userType';
+import messageConnectionType from '../message/messageConnectionType';
+import { createConnectionArguments } from '../../../db/helpers/pagination';
+import { findMessages } from '../message/messageMongoHelper';
 
 const getMessage = obj => {
   return obj;
@@ -35,26 +32,25 @@ const conversationType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: (parent, _, context) => {
         return parent.title;
-      },
+      }
     },
     avatar: {
       type: GraphQLString
     },
-    // messages: {
-    //   type: messageConnection,
-    //   args: connectionArgs,
-    //   resolve: async (parent, args, context) => {
-    //     if (!context.user) {
-    //       return null;
-    //     }
-    //
-    //     const convoId = parent._id ? parent._id : parent.id;
-    //     const messages = await Message.find({
-    //       conversationId: convoId
-    //     }).sort({ _id: -1 });
-    //     return connectionFromArray(messages.map(getMessage), args);
-    //   }
-    // },
+    messages: {
+      type: messageConnectionType,
+      args: createConnectionArguments(),
+      resolve: (parent, args, context) => {
+        if (!context.user) {
+          return null;
+        }
+        const convoId = parent._id ? parent._id : parent.id;
+        const queryParams = {
+          conversationId: convoId
+        };
+        return findMessages(args, queryParams);
+      }
+    },
     recipients: {
       type: GraphQLList(userType),
       resolve: async (parent, args, context) => {

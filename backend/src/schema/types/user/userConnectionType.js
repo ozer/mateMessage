@@ -1,12 +1,12 @@
 import { GraphQLObjectType, GraphQLList, GraphQLNonNull } from 'graphql';
-import messageEdgeType from './messageEdgeType';
 import pageInfoType from '../pageInfo/pageInfoType';
+import userEdgeType from './userEdgeType';
 
-const messageConnectionType = new GraphQLObjectType({
-  name: 'MessageConnection',
+const userConnectionType = new GraphQLObjectType({
+  name: 'UserConnection',
   fields: () => ({
     edges: {
-      type: new GraphQLList(messageEdgeType),
+      type: new GraphQLList(userEdgeType),
       resolve: async parent => {
         const result = await parent.query;
         return result;
@@ -18,4 +18,4 @@ const messageConnectionType = new GraphQLObjectType({
   })
 });
 
-export default messageConnectionType;
+export default userConnectionType;

@@ -85,6 +85,7 @@ const MateList = ({ componentId }) => {
         },
         async buttonIndex => {
           if (!buttonIndex) {
+            console.log('mate: ', mate);
             await createConversation({ variables: { recipientId: mate } });
           }
         }

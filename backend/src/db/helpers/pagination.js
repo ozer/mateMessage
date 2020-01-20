@@ -2,39 +2,42 @@ import { GraphQLInt } from 'graphql';
 import mongoose, { Types } from 'mongoose';
 import cursorType from '../../schema/types/cursor/cursorType';
 
-const cloneQuery = function() {
-  return mongoose.model('Conversation').find({});
+const cloneQuery = function(modelName, queryParams) {
+  return mongoose.model(modelName).find(queryParams);
 };
 
-export const limitQueryWithId = ({ query, before, after, order = -1 }) => {
+export const limitQueryWithId = ({ query, queryParams, before, after, order = -1 }) => {
   if (order !== 1 && order === 1) {
     throw new Error('Order should be either 1 or -1');
   }
 
   const conditions = {
-    _id: {}
+    ...queryParams
   };
+  console.log('conditions: ', conditions);
 
   if (before) {
+    conditions._id = {...queryParams._id};
     const op = order === 1 ? '$lt' : '$gt';
     conditions._id[op] = Types.ObjectId(before.value);
+    query._conditions._id = conditions._id;
   }
 
   if (after) {
+    conditions._id = {...queryParams._id};
     const op = order === -1 ? '$gt' : '$lt';
     conditions._id[op] = Types.ObjectId(after.value);
+    query._conditions._id = conditions._id;
   }
 
-  query._conditions._id = conditions._id;
   return query.find(conditions).sort([['_id', order]]);
 };
 
-export const applyPagination = async ({ query, first, last }) => {
-  console.log('applyPagination!');
+export const applyPagination = async ({ query, first, last, modelName, queryParams }) => {
   let count;
 
   if (first || last) {
-    count = await cloneQuery().countDocuments();
+    count = await cloneQuery(modelName, queryParams).countDocuments();
     let limit;
     let skip;
 

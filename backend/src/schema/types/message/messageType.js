@@ -1,9 +1,8 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql';
-import { globalIdField, connectionDefinitions } from 'graphql-relay';
+import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
 import Message from '../../../db/models/Message';
-import { resolveCursor } from '../../schemaHelper/connectionHelper';
 
 const messageType = new GraphQLObjectType({
   name: 'Message',

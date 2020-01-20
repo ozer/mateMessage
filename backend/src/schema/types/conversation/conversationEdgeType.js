@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLObjectType } from 'graphql';
 import conversationType from './conversationType';
 import cursorType from '../cursor/cursorType';
 
@@ -8,7 +8,6 @@ const conversationEdgeType = new GraphQLObjectType({
     cursor: {
       type: cursorType,
       resolve: (parent) => {
-        console.log('[cursorResolver]: ', parent);
         return {
           value: parent._id.toString(),
         }

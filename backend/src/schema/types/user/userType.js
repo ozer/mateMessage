@@ -1,9 +1,8 @@
-import { GraphQLObjectType, GraphQLString, GraphQLID } from 'graphql';
+import { GraphQLObjectType, GraphQLString } from 'graphql';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
-import { globalIdField, connectionDefinitions } from 'graphql-relay';
+import { globalIdField } from 'graphql-relay';
 import User from '../../../db/models/User';
-import { resolveCursor } from '../../schemaHelper/connectionHelper';
 
 const userType = new GraphQLObjectType({
   name: 'User',
