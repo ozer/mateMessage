@@ -25,27 +25,27 @@ const RootQuery = new GraphQLObjectType({
       }
     },
     node: nodeField,
-    users: {
-      type: userConnection,
-      args: {
-        first: {
-          type: GraphQLInt
-        },
-        after: {
-          type: GraphQLString
-        }
-      },
-      resolve: async (parent, args, context) => {
-        if (!context.user) {
-          return null;
-        }
-        const { user } = context;
-
-        const users = await User.find({ _id: { $ne: user.id } }).limit(2);
-
-        return connectionFromArray(users.map(getUserFromConnection), {});
-      }
-    }
+    // users: {
+    //   type: userConnection,
+    //   args: {
+    //     first: {
+    //       type: GraphQLInt
+    //     },
+    //     after: {
+    //       type: GraphQLString
+    //     }
+    //   },
+    //   resolve: async (parent, args, context) => {
+    //     if (!context.user) {
+    //       return null;
+    //     }
+    //     const { user } = context;
+    //
+    //     const users = await User.find({ _id: { $ne: user.id } }).limit(2);
+    //
+    //     return connectionFromArray(users.map(getUserFromConnection), {});
+    //   }
+    // }
   })
 });
 

@@ -1,15 +1,17 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql';
+import mongoose from 'mongoose';
 import {
   globalIdField,
   connectionFromArray,
   connectionArgs
 } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
-import { userConnection } from '../user/userType';
-import { conversationConnection } from '../conversation/conversationType';
 import Conversation from '../../../db/models/Conversation';
 import { idMapping } from '../../../helpers/mapping';
 import User from '../../../db/models/User';
+import conversationConnectionType from '../conversation/conversationConnectionType';
+import { findConversations } from '../conversation/conversationMongoHelper';
+import { createConnectionArguments } from '../../../db/helpers/pagination';
 
 const getConversation = obj => {
   return obj;
@@ -40,37 +42,47 @@ const viewerType = new GraphQLObjectType({
     avatar: {
       type: GraphQLString
     },
-    mates: {
-      type: userConnection,
-      args: connectionArgs,
-      resolve: async (parentVal, args, context) => {
-        console.log('resolver of mates');
+    // mates: {
+    //   type: userConnection,
+    //   args: connectionArgs,
+    //   resolve: async (parentVal, args, context) => {
+    //     console.log('resolver of mates');
+    //     if (!context.user) {
+    //       return null;
+    //     }
+    //     const { user } = context;
+    //     const mates = await User.find({ _id: { $ne: user.id } });
+    //     return connectionFromArray(mates, args);
+    //   }
+    // },
+    allConversations: {
+      type: conversationConnectionType,
+      args: createConnectionArguments(),
+      resolve: (parent, args, context) => {
         if (!context.user) {
           return null;
         }
-        const { user } = context;
-        const mates = await User.find({ _id: { $ne: user.id } });
-        return connectionFromArray(mates, args);
+        return findConversations(args);
       }
     },
-    feed: {
-      type: conversationConnection,
-      args: connectionArgs,
-      resolve: async (parentValue, args, context) => {
-        if (context && context.user) {
-          const { user } = context;
-
-          const feed = await Conversation.find({
-            recipients: {
-              $in: [user.id]
-            }
-          });
-
-          return connectionFromArray(feed.map(getConversation), args);
-        }
-        return null;
-      }
-    }
+    // feed: {
+    //   type: conversationConnection,
+    //   args: connectionArgs,
+    //   resolve: async (parentValue, args, context) => {
+    //     if (context && context.user) {
+    //       const { user } = context;
+    //
+    //       const feed = await Conversation.find({
+    //         recipients: {
+    //           $in: [user.id]
+    //         }
+    //       });
+    //
+    //       return connectionFromArray(feed.map(getConversation), args);
+    //     }
+    //     return null;
+    //   }
+    // }
   }),
   interfaces: [nodeInterface]
 });
