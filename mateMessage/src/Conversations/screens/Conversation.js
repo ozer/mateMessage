@@ -137,6 +137,7 @@ const Conversation = ({ conversationId, componentId }) => {
         keyExtractor={item => item.node.messageId}
         data={messageEdges}
         renderItem={renderItem}
+        onEndReachedThreshold={0}
         onEndReached={() => console.log('reached to the end!')}
         inverted
       />

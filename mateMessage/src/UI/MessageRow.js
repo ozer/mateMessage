@@ -1,14 +1,10 @@
 import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import moment from 'moment';
 import StyledView from './StyledView';
 import StyledText from './StyledText';
-import moment from 'moment';
 
 const MessageRow = ({ onFlight, content, self, created_at }) => {
-  console.log('moment', created_at);
-  if (onFlight) {
-    console.log('message is not delivered yet.');
-  }
   return (
     <StyledView
       paddingX={2}
@@ -25,7 +21,7 @@ const MessageRow = ({ onFlight, content, self, created_at }) => {
           {content}
         </StyledText>
         <StyledText style={{ textAlign: 'right' }}>
-          {self && onFlight ? <Icon name={"clock-o"} size={16} /> : null}
+          {self && onFlight ? <Icon name={'clock-o'} size={16} /> : null}
           {moment(created_at, 'x').format('LT')}
         </StyledText>
       </StyledView>

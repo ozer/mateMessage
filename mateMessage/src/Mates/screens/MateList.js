@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, ActionSheetIOS } from 'react-native';
 import {
   ActionSheetProvider,
@@ -43,8 +43,7 @@ const MateList = ({ componentId }) => {
         const convos = viewer.feed;
         if (
           convos.edges.findIndex(
-            item =>
-              item.node.conversationId !== conversationId
+            item => item.node.conversationId !== conversationId
           ) < 0
         ) {
           convos.edges.push({
@@ -70,7 +69,14 @@ const MateList = ({ componentId }) => {
   const {
     data: { viewer },
     refetch
-  } = useQuery(MateListQuery);
+  } = useQuery(MateListQuery, {
+    variables: {
+      first: 20,
+    },
+    onError: error => {
+      console.log('error ', error);
+    }
+  });
 
   const edges = get(viewer, 'mates.edges') || [];
 
@@ -125,6 +131,13 @@ const MateList = ({ componentId }) => {
             onRefresh={onRefresh}
             data={edges}
             keyExtractor={item => item.node.userId}
+            onEndReachedThreshold={0}
+            onEndReached={async () => {
+              console.log('onEndReached!');
+              const lastMateCursor = edges[edges.length-1].cursor;
+              console.log('[lastMateCursor]: ', lastMateCursor);
+              await refetch({ after: lastMateCursor, first: 10, order: 1 });
+            }}
             renderItem={({ item: { node } }) => (
               <MateRow
                 id={node.userId}
@@ -141,11 +154,16 @@ const MateList = ({ componentId }) => {
 };
 
 const MateListQuery = gql`
-  query Viewer {
+  query MateListQuery($first: Int, $after: Cursor, $order: Int) {
     viewer {
       id
-      mates {
+      mates(first: $first, after: $after, order: $order) {
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+        }
         edges {
+          cursor
           node {
             id
             userId
