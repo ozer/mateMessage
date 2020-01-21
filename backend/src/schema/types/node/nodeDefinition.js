@@ -30,7 +30,7 @@ const getConversation = async conversationId => {
 
 export const { nodeInterface, nodeField } = nodeDefinitions(async globalId => {
   const { type, id } = fromGlobalId(globalId);
-  console.log('nodeDefinition: id -> ', id, ' type -> ', type);
+
   if (type === 'Viewer') {
     return getViewer(id);
   }

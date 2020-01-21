@@ -43,7 +43,6 @@ const viewerType = new GraphQLObjectType({
       type: userConnectionType,
       args: createConnectionArguments(),
       resolve: async (parentVal, args, context) => {
-        console.log('resolver of mates');
         if (!context.user) {
           return null;
         }
@@ -51,7 +50,7 @@ const viewerType = new GraphQLObjectType({
         const queryParams = {
           _id: { $ne: user.id }
         };
-        return findUsers(args, queryParams);
+        return await findUsers(args, queryParams);
       }
     },
     feed: {

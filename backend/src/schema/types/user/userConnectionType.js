@@ -7,8 +7,12 @@ const userConnectionType = new GraphQLObjectType({
   fields: () => ({
     edges: {
       type: new GraphQLList(userEdgeType),
-      resolve: async parent => {
+      resolve: async (parent, args, context) => {
+        const { userLoader } = context;
         const result = await parent.query;
+        for (const user of result) {
+          userLoader.prime(user._id, user);
+        }
         return result;
       }
     },
