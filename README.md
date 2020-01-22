@@ -8,9 +8,22 @@
 * MongoDB
 * React Native structured with RNN using Apollo Client.
 
+## Highlights on the Backend
+* `Relay` Node Definitions and Array Connections.
+* MongoDB `Cursor` Based Pagination using `Relay` Array Connection Args.
+* The usage of `dataLoader`.
+* GraphQL Subscriptions.
+
+## Highlights on the App
+* Local Cache Management.
+* Offline Message Sending and Sync when the app is back online(Without killing the app for now :) ).
+* React & Apollo Hooks.
+* Nice examples of React Native Navigation library.
+
 #### Soon, there will be a video.
 
-#### Soon, the integration test will be developed again.
+#### I focused mostly on making this app work and see how this tech stack dances in a harmony.
+#### I'll try to add as many tests as when I have time for it.
 
 ## Instructions to start the server for development.
 * cd ./backend && yarn
@@ -33,9 +46,10 @@
 
 
 ## Known Issues:
-* There is no typing...
-* Few rnn issues such as largeTitle goes away with a bit delay.
+* There is no `typing`. I wish I had started with `TypeScript`.
+* Few rnn issues, some of them are open issues on the gitHub.
 
 ## Future work:
-* Relay pagination will be implemented to work with MongoDB.
+* Make `backend` dockerized so the rest api for auth, graphql and graph subscriptions will be three seperate node instances. I believe `this is the way` for it to be `scalable`.
+* Obviously, polishing UI...
 * UI for creating a group conversation.
