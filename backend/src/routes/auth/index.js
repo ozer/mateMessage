@@ -19,7 +19,7 @@ router.post('/signUp', async (request, response) => {
       if (userExists) {
         return response
           .json('User registered with this email exists.')
-          .status(401);
+          .status(400);
       }
       const user = new User({ name, email, password, username });
       await user.save();
@@ -48,7 +48,6 @@ router.post('/signUp', async (request, response) => {
 
 router.post('/signIn', async (request, response) => {
   try {
-    console.log('request.body', request.body);
     if (request.body && request.body.username && request.body.password) {
       const { body } = request;
       const { username, password } = body;

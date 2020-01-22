@@ -4,9 +4,8 @@ import { v4 } from 'uuid';
 
 jwt.verify = promisify(jwt.verify);
 
-export const generateToken = async credentials => {
+export const generateToken = credentials => {
   const { email, id, username, name } = credentials;
-  console.log('generateToken...'); // eslint-disable-line
   const session = {
     email,
     id,
