@@ -42,8 +42,7 @@ const viewerType = new GraphQLObjectType({
     mates: {
       type: userConnectionType,
       args: createConnectionArguments(),
-      resolve: async (parentVal, args, context) => {
-        console.log('resolver of mates');
+      resolve: async (_, args, context) => {
         if (!context.user) {
           return null;
         }
@@ -70,24 +69,6 @@ const viewerType = new GraphQLObjectType({
         return findConversations(args, queryParams);
       }
     }
-    // feed: {
-    //   type: conversationConnection,
-    //   args: connectionArgs,
-    //   resolve: async (parentValue, args, context) => {
-    //     if (context && context.user) {
-    //       const { user } = context;
-    //
-    //       const feed = await Conversation.find({
-    //         recipients: {
-    //           $in: [user.id]
-    //         }
-    //       });
-    //
-    //       return connectionFromArray(feed.map(getConversation), args);
-    //     }
-    //     return null;
-    //   }
-    // }
   }),
   interfaces: [nodeInterface]
 });
