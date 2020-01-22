@@ -52,9 +52,8 @@ const conversationType = new GraphQLObjectType({
         if (!context.user) {
           return null;
         }
-
         const { userLoader } = context;
-
+         
         const recipients = await userLoader.loadMany(parent.recipients);
 
         return recipients;

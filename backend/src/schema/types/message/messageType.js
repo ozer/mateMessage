@@ -3,6 +3,7 @@ import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
 import Message from '../../../db/models/Message';
+import userType from '../user/userType';
 
 const messageType = new GraphQLObjectType({
   name: 'Message',
@@ -18,6 +19,15 @@ const messageType = new GraphQLObjectType({
     senderId: {
       type: GraphQLString
     },
+    // sender: {
+    //   type: userType,
+    //   resolve: async (parent, _, context) => {
+    //     const { userLoader } = context;
+    //     const { senderId } = parent;
+    //     const sender = await userLoader.load(senderId);
+    //     return sender;
+    //   }
+    // },
     conversationId: {
       type: GraphQLString
     },

@@ -11,13 +11,17 @@ import restAPI from './routes';
 // Getting base GraphQL Schema
 import schema from './schema';
 import { validateToken } from './helpers/Authenticator';
-import { getuserLoader } from './dataloaders/userLoader';
 import { buildContext } from './schema/context';
 
 const PORT = 4000;
 
 mongoose.Promise = global.Promise;
 mongoose.set('useCreateIndex', true);
+if (process.env.NODE_ENV === 'development') {
+  mongoose.set('debug', function(coll, method, query) {
+    console.log('[query]: ', query, ' from [collection]: ', coll);
+  });
+}
 let httpServer;
 
 export const initializeServer = async () => {
