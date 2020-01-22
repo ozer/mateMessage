@@ -14,7 +14,6 @@ export const limitQueryWithId = ({ query, queryParams, before, after, order = -1
   const conditions = {
     ...queryParams
   };
-  console.log('conditions: ', conditions);
 
   if (before) {
     conditions._id = {...queryParams._id};

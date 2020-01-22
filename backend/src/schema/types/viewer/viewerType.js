@@ -50,7 +50,7 @@ const viewerType = new GraphQLObjectType({
         const queryParams = {
           _id: { $ne: user.id }
         };
-        return findUsers(args, queryParams);
+        return await findUsers(args, queryParams);
       }
     },
     feed: {

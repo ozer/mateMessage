@@ -5,15 +5,10 @@ import {
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
 import Conversation from '../../../db/models/Conversation';
-import User from '../../../db/models/User';
 import userType from '../user/userType';
 import messageConnectionType from '../message/messageConnectionType';
 import { createConnectionArguments } from '../../../db/helpers/pagination';
 import { findMessages } from '../message/messageMongoHelper';
-
-const getMessage = obj => {
-  return obj;
-};
 
 const conversationType = new GraphQLObjectType({
   name: 'Conversation',
@@ -57,11 +52,10 @@ const conversationType = new GraphQLObjectType({
         if (!context.user) {
           return null;
         }
+        const { userLoader } = context;
+         
+        const recipients = await userLoader.loadMany(parent.recipients);
 
-        const recipients = await User.find(
-          { _id: { $in: parent.recipients } },
-          { password: 0, jwt: 0 }
-        );
         return recipients;
       }
     }

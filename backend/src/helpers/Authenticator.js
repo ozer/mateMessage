@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 import { v4 } from 'uuid';
-import User from '../db/models/User';
 
 jwt.verify = promisify(jwt.verify);
 
