@@ -1,10 +1,11 @@
+import { describe, before, it } from 'mocha';
 import { expect } from 'chai';
 import WebSocket from 'ws';
 import ApolloClient from 'apollo-client';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { signIn, signUp, isTokenAuthenticated } from './api/auth';
+import { signIn, signUp, isTokenAuthenticated } from './apiHelper/auth';
 import { initializeServer, killServer } from '../src/server';
 import { dropDatabase } from './utils/db';
 import gql from 'graphql-tag';
@@ -18,7 +19,7 @@ const delay = s =>
     }, s);
   });
 
-describe('Messaging Test', () => {
+describe.skip('Messaging Test', () => {
   let leo;
   const leoCache = new InMemoryCache();
   let leoWsLink;
@@ -35,14 +36,21 @@ describe('Messaging Test', () => {
     await initializeServer();
     await signUp(Leo);
     await signUp(Ozer);
-    leo = await signIn({ username: Leo.username, password: Leo.password });
-    leo = leo.signIn.user;
-    ozer = await signIn({ username: Ozer.username, password: Ozer.password });
-    ozer = ozer.signIn.user;
+
+    ({ data: { user: leo} } = await signIn({
+      username: Leo.username,
+      password: Leo.password
+    }));
+
+    ({ data: { user: ozer } } = await signIn({
+      username: Ozer.username,
+      password: Ozer.password
+    }));
+
     console.log('leo', leo);
     console.log('ozer', ozer);
     leoWsLink = new WebSocketLink({
-      uri: 'ws://localhost:4000/graphql',
+      uri: 'ws://localhost:4000/api/graphql',
       webSocketImpl: WebSocket,
       options: {
         connectionCallback: () => {
@@ -60,7 +68,7 @@ describe('Messaging Test', () => {
       webSocketImpl: WebSocket,
       options: {
         connectionCallback: () => {
-            console.log(`Ozer's ws is connected to the wss successfully.`);
+          console.log(`Ozer's ws is connected to the wss successfully.`);
         },
         connectionParams: () => ({
           authToken: ozer.jwt
@@ -102,8 +110,8 @@ describe('Messaging Test', () => {
       })
       .subscribe({
         next: data => {
-            console.log('Leo Message Subscription -> ', data);
-            expect(data.data.messageCreated.content).to.equal('Hi Leo');
+          console.log('Leo Message Subscription -> ', data);
+          expect(data.data.messageCreated.content).to.equal('Hi Leo');
         },
         error: err => console.log('error: ', err)
       });
@@ -127,15 +135,15 @@ describe('Messaging Test', () => {
       })
       .subscribe({
         next: data => {
-            console.log('Ozer Message Subscription -> ', data);
-            expect(data.data.messageCreated.content).to.equal('Hi Ozer');
+          console.log('Ozer Message Subscription -> ', data);
+          expect(data.data.messageCreated.content).to.equal('Hi Ozer');
         },
         error: err => console.log('error: ', err)
       });
 
-      expect(leoMessageSubscription._state).to.equal('ready');
-      expect(ozerMessageSubscription._state).to.equal('ready');
-      
+    expect(leoMessageSubscription._state).to.equal('ready');
+    expect(ozerMessageSubscription._state).to.equal('ready');
+
     const conversation = await ozerClient().mutate({
       mutation: gql`
         mutation CreateConversation($receiverId: String!) {
@@ -168,7 +176,9 @@ describe('Messaging Test', () => {
       conversation.data.createConversation.conversationData.id
     );
 
-    expect(conversation.data.createConversation.conversationData.id).to.not.equal('' || undefined || null);
+    expect(
+      conversation.data.createConversation.conversationData.id
+    ).to.not.equal('' || undefined || null);
 
     await ozerClient().mutate({
       mutation: gql`
@@ -195,27 +205,27 @@ describe('Messaging Test', () => {
     });
 
     await leoClient().mutate({
-        mutation: gql`
-          mutation SendMessage($content: String!, $conversationId: String) {
-            sendMessage(content: $content, conversationId: $conversationId) {
-              state
-              messageData {
+      mutation: gql`
+        mutation SendMessage($content: String!, $conversationId: String) {
+          sendMessage(content: $content, conversationId: $conversationId) {
+            state
+            messageData {
+              id
+              content
+              conversation {
                 id
-                content
-                conversation {
-                  id
-                }
-                sender {
-                  id
-                }
+              }
+              sender {
+                id
               }
             }
           }
-        `,
-        variables: {
-          content: 'Hi Ozer',
-          conversationId: conversation.data.createConversation.conversationData.id
         }
-      });
+      `,
+      variables: {
+        content: 'Hi Ozer',
+        conversationId: conversation.data.createConversation.conversationData.id
+      }
+    });
   });
 });

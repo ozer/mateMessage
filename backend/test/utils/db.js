@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 
 export const dropDatabase = async () => {
   mongoose.connect(`mongodb://localhost:27017/${process.env.NODE_ENV}-MateMessage`, {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
   });
 
   await mongoose.connection
