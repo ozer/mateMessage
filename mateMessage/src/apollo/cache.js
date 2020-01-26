@@ -5,7 +5,7 @@ import { decode } from 'base-64';
 import introspectionQueryResultData from '../fragmentTypes';
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData
+  introspectionQueryResultData,
 });
 
 export const cache = new InMemoryCache({
@@ -14,12 +14,13 @@ export const cache = new InMemoryCache({
   cacheRedirects: {
     Query: {
       node: (_, args, { getCacheKey }) => {
+        console.log('args: ', args);
         const { id } = args;
         const decoded = decode(id);
         const [type] = decoded.split(':');
         return getCacheKey({ __typename: type, id: args.id });
       },
-    }
+    },
   }
 });
 

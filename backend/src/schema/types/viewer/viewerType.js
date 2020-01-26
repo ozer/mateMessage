@@ -1,7 +1,5 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql';
-import {
-  globalIdField,
-} from 'graphql-relay';
+import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
 import conversationConnectionType from '../conversation/conversationConnectionType';
@@ -48,7 +46,11 @@ const viewerType = new GraphQLObjectType({
         }
         const { user } = context;
         const queryParams = {
-          _id: { $ne: user.id }
+          $and: [
+            {
+              _id: { $ne: user.id }
+            }
+          ]
         };
         return await findUsers(args, queryParams);
       }
@@ -62,9 +64,13 @@ const viewerType = new GraphQLObjectType({
         }
         const { user } = context;
         const queryParams = {
-          recipients: {
-            $in: [user.id]
-          }
+          $and: [
+            {
+              recipients: {
+                $in: [user.id]
+              }
+            }
+          ]
         };
         return findConversations(args, queryParams);
       }

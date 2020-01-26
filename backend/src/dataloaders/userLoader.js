@@ -4,7 +4,6 @@ import User from '../db/models/User';
 export const getuserLoader = () =>
   new DataLoader(
     async userIds => {
-      console.log('userIds', userIds);
       return await User.find(
         { _id: { $in: userIds } },
         { password: 0, jwt: 0 }

@@ -33,11 +33,4 @@ const userType = new GraphQLObjectType({
   interfaces: [nodeInterface]
 });
 
-// export const { connectionType: userConnection } = connectionDefinitions({
-//   nodeType: userType,
-//   resolveCursor: ({ node }) => {
-//     return resolveCursor({ type: 'User', id: node._id });
-//   },
-// });
-
 export default userType;

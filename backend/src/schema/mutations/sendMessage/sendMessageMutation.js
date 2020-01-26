@@ -75,11 +75,6 @@ export const sendMessageMutation = {
       created_at: new Date(newMessage.created_at).getTime().toString()
     });
 
-    console.log(
-      'newMessage.created_at: ',
-      new Date(newMessage.created_at).getTime().toString()
-    );
-
     return {
       id: base64,
       messageId: newMessage._id,

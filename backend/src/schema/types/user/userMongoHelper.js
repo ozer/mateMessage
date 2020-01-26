@@ -6,8 +6,8 @@ export const findUsers = async (
   { first, last, before, after, order },
   queryParams
 ) => {
-  const query = limitQueryWithId({
-    query: mongoose.model('User').find(),
+  const { query, conditions } = limitQueryWithId({
+    query: mongoose.model('User').find({}),
     queryParams,
     before,
     after,
@@ -15,6 +15,7 @@ export const findUsers = async (
   });
   const pageInfo = await applyPagination({
     query,
+    conditions,
     first,
     last,
     modelName: 'User',

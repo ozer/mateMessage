@@ -4,25 +4,21 @@ import Message from '../../../db/models/Message';
 import Conversation from '../../../db/models/Conversation';
 
 const getUser = async userId => {
-  console.log('getUser');
   const user = await User.findById(userId, { password: 0, jwt: 0 });
   return user;
 };
 
 const getViewer = async userId => {
-  console.log('getViewer');
   const user = await User.findById(userId, { password: 0, jwt: 0 });
   user.isViewer = true;
   return user;
 };
 
 const getMessage = async messageId => {
-  console.log('getMessage');
   return Message.findById(messageId);
 };
 
 const getConversation = async conversationId => {
-  console.log('getConversation!', conversationId);
   const conversation = await Conversation.findById(conversationId);
   conversation.isConversation = true;
   return conversation;

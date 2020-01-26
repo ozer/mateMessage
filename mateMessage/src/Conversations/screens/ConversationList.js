@@ -17,6 +17,8 @@ import {
 import { ConversationFragments } from './Conversation';
 import { navigateToConversation } from '../navHelper';
 import NetworkStatusBar from '../../UI/NetworkStatusBar';
+import { theme } from '../../theme/theme';
+import { ThemeProvider } from 'emotion-theming';
 
 const ConversationListZeroStateComponent = () => {
   return (
@@ -38,14 +40,21 @@ const ConversationList = ({ componentId }) => {
 
   const {
     loading,
-    data: { viewer }
+    data: { viewer },
+    fetchMore
   } = useQuery(ConversationListQuery, {
     returnPartialData: true,
+    variables: {
+      first: 20,
+      order: -1,
+      messagesFirst: 10
+    },
     onError: e => {
       console.log('error: ', e);
     }
   });
   const feedEdges = get(viewer, 'feed.edges');
+  const pageInfo = get(viewer, 'feed.pageInfo');
 
   useSubscription(MessageCreated, {
     onSubscriptionData: ({ client, subscriptionData }) => {
@@ -127,14 +136,6 @@ const ConversationList = ({ componentId }) => {
     }
   });
 
-  if (loading) {
-    return (
-      <View>
-        <Text>Loading!</Text>
-      </View>
-    );
-  }
-
   const renderItem = ({ item: { node } }) => {
     const conversationId = get(node, 'conversationId') || '';
     const title = get(node, 'title') || '';
@@ -150,16 +151,57 @@ const ConversationList = ({ componentId }) => {
       />
     );
   };
+
   return (
-    <View style={{ flex: 1 }}>
+    <ThemeProvider theme={theme}>
       <NetworkStatusBar visible={!isInternetReachable || !isConnected} />
-      <FlatList
-        ListEmptyComponent={ConversationListZeroStateComponent}
-        data={feedEdges}
-        keyExtractor={item => item.node.conversationId}
-        renderItem={renderItem}
-      />
-    </View>
+      <View style={{ flex: 1 }}>
+        <FlatList
+          ListEmptyComponent={ConversationListZeroStateComponent}
+          data={feedEdges}
+          keyExtractor={item => item.node.conversationId}
+          renderItem={renderItem}
+          refreshing={false}
+          onEndReachedThreshold={0}
+          onEndReached={async () => {
+            console.log('pageInfo: ', pageInfo);
+            if (pageInfo.hasNextPage) {
+              const lastConvoCursor = feedEdges[feedEdges.length - 1].cursor;
+              console.log(
+                '[onEndReached from ConversationList]: lastConvoCursor: ',
+                lastConvoCursor
+              );
+              await fetchMore({
+                variables: {
+                  first: 20,
+                  order: -1,
+                  cursor: lastConvoCursor,
+                  messagesFirst: 10
+                },
+                updateQuery: (previousResult, { fetchMoreResult }) => {
+                  const fetchMoreResult_viewer = fetchMoreResult.viewer;
+
+                  return fetchMoreResult_viewer.feed.edges.length
+                    ? {
+                        viewer: {
+                          ...fetchMoreResult_viewer,
+                          feed: {
+                            ...fetchMoreResult_viewer.feed,
+                            edges: [
+                              ...previousResult.viewer.feed.edges,
+                              ...fetchMoreResult_viewer.feed.edges
+                            ]
+                          }
+                        }
+                      }
+                    : previousResult;
+                }
+              });
+            }
+          }}
+        />
+      </View>
+    </ThemeProvider>
   );
 };
 
@@ -171,8 +213,12 @@ ConversationList.options = () => ({
 
 const ConversationListFragments = {
   conversationConnection: gql`
-    fragment ConversationList on ConversationConnection {
+    fragment ConversationList_ConversationConnection on ConversationConnection {
+      pageInfo {
+        hasNextPage
+      }
       edges {
+        cursor
         node {
           id
           __typename
@@ -181,16 +227,22 @@ const ConversationListFragments = {
       }
     }
 
-    ${ConversationFragments.conversation}
+    ${ConversationFragments.paginatedConversation}
   `
 };
 
 export const ConversationListQuery = gql`
-  query ConversationListQuery {
+  query ConversationListQuery(
+    $first: Int
+    $order: Int
+    $cursor: Cursor
+    $messagesFirst: Int
+    $messageCursor: Cursor
+  ) {
     viewer {
       id
-      feed {
-        ...ConversationList
+      feed(first: $first, before: $cursor, order: $order) {
+        ...ConversationList_ConversationConnection
       }
     }
   }

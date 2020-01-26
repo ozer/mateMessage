@@ -1,7 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList } from 'graphql';
-import {
-  globalIdField,
-} from 'graphql-relay';
+import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
 import Conversation from '../../../db/models/Conversation';
@@ -32,6 +30,9 @@ const conversationType = new GraphQLObjectType({
     avatar: {
       type: GraphQLString
     },
+    created_at: {
+      type: GraphQLString
+    },
     messages: {
       type: messageConnectionType,
       args: createConnectionArguments(),
@@ -41,7 +42,11 @@ const conversationType = new GraphQLObjectType({
         }
         const convoId = parent._id ? parent._id : parent.id;
         const queryParams = {
-          conversationId: convoId
+          $and: [
+            {
+              conversationId: convoId
+            }
+          ]
         };
         return findMessages(args, queryParams);
       }
@@ -53,7 +58,7 @@ const conversationType = new GraphQLObjectType({
           return null;
         }
         const { userLoader } = context;
-         
+
         const recipients = await userLoader.loadMany(parent.recipients);
 
         return recipients;
@@ -62,14 +67,5 @@ const conversationType = new GraphQLObjectType({
   }),
   interfaces: [nodeInterface]
 });
-
-// export const { connectionType: conversationConnection } = connectionDefinitions(
-//   {
-//     nodeType: conversationType,
-//     resolveCursor: ({ node }) => {
-//       return resolveCursor({ type: 'Conversation', id: node._id });
-//     }
-//   }
-// );
 
 export default conversationType;

@@ -70,9 +70,6 @@ const MateList = ({ componentId }) => {
     data: { viewer },
     refetch
   } = useQuery(MateListQuery, {
-    variables: {
-      first: 20,
-    },
     onError: error => {
       console.log('error ', error);
     }
@@ -132,12 +129,6 @@ const MateList = ({ componentId }) => {
             data={edges}
             keyExtractor={item => item.node.userId}
             onEndReachedThreshold={0}
-            onEndReached={async () => {
-              console.log('onEndReached!');
-              const lastMateCursor = edges[edges.length-1].cursor;
-              console.log('[lastMateCursor]: ', lastMateCursor);
-              await refetch({ after: lastMateCursor, first: 10, order: 1 });
-            }}
             renderItem={({ item: { node } }) => (
               <MateRow
                 id={node.userId}
@@ -154,10 +145,10 @@ const MateList = ({ componentId }) => {
 };
 
 const MateListQuery = gql`
-  query MateListQuery($first: Int, $after: Cursor, $order: Int) {
+  query MateListQuery {
     viewer {
       id
-      mates(first: $first, after: $after, order: $order) {
+      mates{
         pageInfo {
           hasNextPage
           hasPreviousPage

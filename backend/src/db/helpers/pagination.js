@@ -6,37 +6,48 @@ const cloneQuery = function(modelName, queryParams) {
   return mongoose.model(modelName).find(queryParams);
 };
 
-export const limitQueryWithId = ({ query, queryParams, before, after, order = -1 }) => {
+export const limitQueryWithId = ({
+  query,
+  queryParams,
+  before,
+  after,
+  order
+}) => {
   if (order !== 1 && order === 1) {
     throw new Error('Order should be either 1 or -1');
   }
 
-  const conditions = {
-    ...queryParams
-  };
+  const conditions = queryParams;
 
   if (before) {
-    conditions._id = {...queryParams._id};
-    const op = order === 1 ? '$lt' : '$gt';
-    conditions._id[op] = Types.ObjectId(before.value);
-    query._conditions._id = conditions._id;
+    const idQuery = { _id: { ['$lt']: Types.ObjectId(before.value) } };
+    conditions['$and'].push(idQuery);
   }
 
   if (after) {
-    conditions._id = {...queryParams._id};
-    const op = order === -1 ? '$gt' : '$lt';
-    conditions._id[op] = Types.ObjectId(after.value);
-    query._conditions._id = conditions._id;
+    const idQuery = { _id: { ['$gt']: Types.ObjectId(after.value) } };
+    conditions['$and'].push(idQuery);
   }
 
-  return query.find(conditions).sort([['_id', order]]);
+  return {
+    query: query.find(conditions).sort({ _id: order }),
+    conditions
+  };
 };
 
-export const applyPagination = async ({ query, first, last, modelName, queryParams }) => {
+export const applyPagination = async ({
+  query,
+  conditions = {},
+  first,
+  last,
+  modelName,
+  queryParams
+}) => {
   let count;
 
   if (first || last) {
     count = await cloneQuery(modelName, queryParams).countDocuments();
+    console.log(`[${modelName}]: [count] -> ${count}`);
     let limit;
     let skip;
 
@@ -83,7 +94,7 @@ export const createConnectionArguments = () => {
       type: cursorType
     },
     order: {
-      type: GraphQLInt,
+      type: GraphQLInt
     }
   };
 };

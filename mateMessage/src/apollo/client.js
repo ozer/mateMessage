@@ -28,12 +28,12 @@ const apolloClient = new ApolloClient({
       onFlight: () => {
         return false;
       }
-    }
+    },
   },
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',
-      returnPartialData: true
+      returnPartialData: true,
     }
   },
   onError: onError(({ graphQLErrors, networkError }) => {

@@ -9,8 +9,8 @@ export const findMessages = async (
   { first, last, before, after, order },
   queryParams
 ) => {
-  const query = limitQueryWithId({
-    query: mongoose.model('Message').find(),
+  const { query, conditions } = limitQueryWithId({
+    query: mongoose.model('Message').find({}),
     queryParams,
     before,
     after,
@@ -18,6 +18,7 @@ export const findMessages = async (
   });
   const pageInfo = await applyPagination({
     query,
+    conditions,
     first,
     last,
     modelName: 'Message',

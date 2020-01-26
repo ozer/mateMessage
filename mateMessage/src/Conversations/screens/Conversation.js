@@ -9,7 +9,7 @@ import { MessageRow } from '../../UI';
 import ConversationInput from '../containers/ConversationInput';
 
 const Conversation = ({ conversationId, componentId }) => {
-  console.log('conversationNodeId: ', btoa(`Conversation:${conversationId}`));
+  // console.log('conversationNodeId: ', btoa(`Conversation:${conversationId}`));
 
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const keyboardWillShow = event => {
@@ -57,7 +57,7 @@ const Conversation = ({ conversationId, componentId }) => {
     data: { viewer }
   } = useQuery(
     gql`
-      query ConversationListQuery {
+      query Conversation_Viewer {
         viewer {
           id
           userId
@@ -69,10 +69,15 @@ const Conversation = ({ conversationId, componentId }) => {
 
   const {
     data: { node },
-    loading
+    loading,
+    fetchMore
   } = useQuery(
     gql`
-      query Conversation($id: ID!) {
+      query Conversation(
+        $id: ID!
+        $messagesFirst: Int
+        $messageCursor: Cursor
+      ) {
         node(id: $id) {
           id
           __typename
@@ -80,17 +85,19 @@ const Conversation = ({ conversationId, componentId }) => {
         }
       }
 
-      ${ConversationFragments.conversation}
+      ${ConversationFragments.paginatedConversation}
     `,
     {
+      fetchPolicy: 'cache-first',
       variables: {
-        id: btoa(`Conversation:${conversationId}`)
+        id: btoa(`Conversation:${conversationId}`),
+        messagesFirst: 20
       }
     }
   );
 
   const userId = get(viewer, 'userId');
-
+  const pageInfo = get(node, 'messages.pageInfo') || {};
   const messageEdges = get(node, 'messages.edges') || [];
 
   const EmptyList = () => (
@@ -121,8 +128,6 @@ const Conversation = ({ conversationId, componentId }) => {
     );
   }
 
-  console.log('conversation Render!', userId);
-
   return (
     <Animated.View
       style={{
@@ -136,9 +141,45 @@ const Conversation = ({ conversationId, componentId }) => {
         ListEmptyComponent={EmptyList}
         keyExtractor={item => item.node.messageId}
         data={messageEdges}
+        automaticallyAdjustContentInsets
         renderItem={renderItem}
         onEndReachedThreshold={0}
-        onEndReached={() => console.log('reached to the end!')}
+        onEndReached={async () => {
+          console.log('[pageInfo]: ', pageInfo);
+          console.log('[messageCount]: ', messageEdges.length);
+          const lastMessage = messageEdges[messageEdges.length - 1];
+          if (pageInfo.hasNextPage) {
+            const lastMessageCursor = lastMessage.cursor;
+            console.log(
+              '[onEndReached from MessageList in Conversation]: lastMessageCursor: ',
+              lastMessageCursor
+            );
+            await fetchMore({
+              variables: {
+                messageCursor: lastMessageCursor,
+                first: 20
+              },
+              updateQuery: (previousResult, { fetchMoreResult }) => {
+                const fetchMoreResult_node = fetchMoreResult.node;
+
+                return fetchMoreResult_node.messages.edges.length
+                  ? {
+                      node: {
+                        ...fetchMoreResult_node,
+                        messages: {
+                          ...fetchMoreResult_node.messages,
+                          edges: [
+                            ...previousResult.node.messages.edges,
+                            ...fetchMoreResult.node.messages.edges
+                          ]
+                        }
+                      }
+                    }
+                  : previousResult;
+              }
+            });
+          }
+        }}
         inverted
       />
       <ConversationInput conversationId={conversationId} />
@@ -147,6 +188,37 @@ const Conversation = ({ conversationId, componentId }) => {
 };
 
 export const ConversationFragments = {
+  paginatedConversation: gql`
+    fragment Convo on Conversation {
+      __typename
+      id
+      conversationId
+      title
+      recipients {
+        id
+        name
+      }
+      messages(first: $messagesFirst, order: -1, before: $messageCursor) {
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+        }
+        edges {
+          cursor
+          node {
+            id
+            messageId
+            conversationId
+            senderId
+            content
+            created_at
+            onFlight @client
+            __typename
+          }
+        }
+      }
+    }
+  `,
   conversation: gql`
     fragment Convo on Conversation {
       __typename
@@ -158,6 +230,10 @@ export const ConversationFragments = {
         name
       }
       messages {
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+        }
         edges {
           node {
             id

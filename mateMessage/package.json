@@ -32,6 +32,7 @@
     "react": "^16.10.1",
     "react-apollo": "^3.1.1",
     "react-native": "^0.61.1",
+    "react-native-dark-mode": "^0.2.2",
     "react-native-elements": "^1.1.0",
     "react-native-navigation": "2.26.5",
     "react-native-vector-icons": "6.6.0",

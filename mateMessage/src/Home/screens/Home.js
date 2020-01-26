@@ -1,16 +1,25 @@
-import React, { useEffect } from "react";
-import StyledView from "../../UI/StyledView";
-import StyledText from "../../UI/StyledText";
-import { useQuery } from "@apollo/react-hooks";
-import { Viewer } from "../../queries/Viewer";
-import { Navigation } from "react-native-navigation";
-import HomeHeader from "../../UI/HomeHeader";
-import { getInitials } from "../../helpers/mates";
-import { SafeAreaView } from "react-native";
+import React, { useEffect } from 'react';
+import StyledView from '../../UI/StyledView';
+import StyledText from '../../UI/StyledText';
+import { useQuery } from '@apollo/react-hooks';
+import { Viewer } from '../../queries/Viewer';
+import { Navigation } from 'react-native-navigation';
+import HomeHeader from '../../UI/HomeHeader';
+import { getInitials } from '../../helpers/mates';
+import { AsyncStorage, SafeAreaView } from 'react-native';
 import NetworkStatusBar from '../../UI/NetworkStatusBar';
 import { useNetInfo } from '@react-native-community/netinfo';
 
 const Home = () => {
+  useEffect(() => {
+    const getToken = async () => {
+      const token = await AsyncStorage.getItem('token');
+      console.log('token: ', token);
+    };
+
+    getToken();
+  }, []);
+
   const { isInternetReachable, isConnected } = useNetInfo();
 
   const {
@@ -18,7 +27,7 @@ const Home = () => {
     loading
   } = useQuery(Viewer);
 
-  const name = viewer && viewer.name ? viewer.name : "";
+  const name = viewer && viewer.name ? viewer.name : '';
   const initials = getInitials(name);
 
   return (

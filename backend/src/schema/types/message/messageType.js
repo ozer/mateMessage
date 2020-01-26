@@ -38,11 +38,5 @@ const messageType = new GraphQLObjectType({
   interfaces: [nodeInterface]
 });
 
-// export const { connectionType: messageConnection } = connectionDefinitions({
-//   nodeType: messageType,
-//   resolveCursor: ({ node }) => {
-//     return resolveCursor({ type: 'Message', id: node._id });
-//   }
-// });
 
 export default messageType;
