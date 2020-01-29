@@ -7,13 +7,11 @@ import {
   Text
 } from 'react-native';
 import { encode as btoa } from 'base-64';
-import { useApolloClient, useMutation, useQuery } from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import get from 'lodash.get';
 import { SendMessage } from '../../mutations/Message';
 import { Viewer } from '../../queries/Viewer';
-import { ConversationFragments } from '../screens/Conversation';
-import { ConversationListQuery } from '../screens/ConversationList';
 
 const ConversationInput = ({ conversationId }) => {
   const [content, changeText] = useState('');
@@ -41,7 +39,6 @@ const ConversationInput = ({ conversationId }) => {
         isOptimistic: true
       }
     },
-    refetchQueries: ['Conversation'],
     update: (cache, { data }) => {
       const isOptimistic = data.sendMessage.isOptimistic;
       if (!isOptimistic) {
@@ -102,8 +99,6 @@ const ConversationInput = ({ conversationId }) => {
         },
         __typename: 'MessageEdge'
       };
-
-      // convo.messages.edges.unshift(newMessage);
 
       cache.writeFragment({
         id: encodedConversationId,
