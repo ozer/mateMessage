@@ -8,6 +8,7 @@ export const ConversationCreated = gql`
       title
       recipients {
         id
+        userId
         name
       }
       messages {
@@ -18,7 +19,7 @@ export const ConversationCreated = gql`
             conversationId
             senderId
             content
-            created_at  
+            created_at
             onFlight @client
           }
         }

@@ -58,7 +58,7 @@ const ConversationInput = ({ conversationId }) => {
               id
               name
             }
-            messages(first: 20, order: -1) {
+            messages(first: 20, order: -1) @connection(key: "messages") {
               __typename
               pageInfo {
                 __typename
@@ -86,6 +86,7 @@ const ConversationInput = ({ conversationId }) => {
 
       console.log('building newMessage node');
       const newMessage = {
+        __typename: 'MessageEdge',
         cursor: data.sendMessage.id,
         node: {
           id: data.sendMessage.id,
@@ -96,8 +97,7 @@ const ConversationInput = ({ conversationId }) => {
           content: data.sendMessage.content,
           created_at: data.sendMessage.created_at,
           onFlight: !!isOptimistic
-        },
-        __typename: 'MessageEdge'
+        }
       };
 
       cache.writeFragment({
@@ -112,52 +112,7 @@ const ConversationInput = ({ conversationId }) => {
               id
               name
             }
-            messages(first: 20, order: -1) {
-              pageInfo {
-                hasNextPage
-                hasPreviousPage
-              }
-              edges {
-                cursor
-                node {
-                  id
-                  messageId
-                  conversationId
-                  senderId
-                  content
-                  created_at
-                  onFlight @client
-                  __typename
-                }
-              }
-            }
-          }
-        `,
-        data: Object.assign(
-          {},
-          {
-            ...convo,
-            messages: {
-              ...convo.messages,
-              edges: [newMessage, ...convo.messages.edges]
-            }
-          }
-        )
-      });
-
-      cache.writeFragment({
-        id: encodedConversationId,
-        fragment: gql`
-          fragment ConversationList_Conversation on Conversation {
-            __typename
-            id
-            conversationId
-            title
-            recipients {
-              id
-              name
-            }
-            messages(first: 10, order: -1) {
+            messages(first: 20, order: -1) @connection(key: "messages") {
               pageInfo {
                 hasNextPage
                 hasPreviousPage

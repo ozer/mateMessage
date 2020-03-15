@@ -7,6 +7,7 @@ import userType from '../user/userType';
 import messageConnectionType from '../message/messageConnectionType';
 import { createConnectionArguments } from '../../../db/helpers/pagination';
 import { findMessages } from '../message/messageMongoHelper';
+import User from '../../../db/models/User';
 
 const conversationType = new GraphQLObjectType({
   name: 'Conversation',
@@ -41,6 +42,7 @@ const conversationType = new GraphQLObjectType({
           return null;
         }
         const convoId = parent._id ? parent._id : parent.id;
+        console.log('convoId: ', convoId);
         const queryParams = {
           $and: [
             {
@@ -57,9 +59,15 @@ const conversationType = new GraphQLObjectType({
         if (!context.user) {
           return null;
         }
-        const { userLoader } = context;
+        // Need to figure it out why it didn't work!
+        // const { userLoader } = context;
+        // const recipients = await userLoader.loadMany(parent.recipients);
 
-        const recipients = await userLoader.loadMany(parent.recipients);
+        const recipients = [];
+        for (const recipient of parent.recipients) {
+          const foundRecipient = await User.findById(recipient);
+          recipients.push(foundRecipient);
+        }
 
         return recipients;
       }

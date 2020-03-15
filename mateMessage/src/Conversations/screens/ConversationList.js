@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { useQuery, useSubscription } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import get from 'lodash.get';
@@ -49,6 +49,7 @@ const ConversationList = ({ componentId }) => {
       order: -1,
       messagesFirst: 10
     },
+    fetchPolicy: 'cache-and-network',
     onError: e => {
       console.log('error: ', e);
     }
@@ -58,20 +59,30 @@ const ConversationList = ({ componentId }) => {
 
   useSubscription(MessageCreated, {
     onSubscriptionData: ({ client, subscriptionData }) => {
-      console.log('subscriptionData[messageCreated]: ', subscriptionData);
+      console.log('[Subscription]: messageCreated');
       if (!subscriptionData.data || !subscriptionData.data.messageCreated) {
         return;
       }
+
       const { messageCreated } = subscriptionData.data;
       const convoId = messageCreated.conversationId;
       const encodedConversationId = btoa(`Conversation:${convoId}`);
+      console.log(
+        'searching Fragment with conversationNodeId: ',
+        encodedConversationId
+      );
       const convo = client.readFragment({
         fragment: ConversationFragments.conversation,
         id: encodedConversationId
       });
-      console.log('existing convo', convo);
+
+      console.log(
+        'messageContent: ',
+        subscriptionData.data.messageCreated.content
+      );
 
       if (
+        convo &&
         convo.messages &&
         convo.messages.edges &&
         convo.messages.edges.length
@@ -89,9 +100,9 @@ const ConversationList = ({ componentId }) => {
 
         convo.messages.edges.unshift({
           node: newMessageNode,
+          cursor: messageCreated.id,
           __typename: 'MessageEdge'
         });
-        console.log('newMessageNode', newMessageNode);
 
         return client.writeFragment({
           id: encodedConversationId,
@@ -101,11 +112,49 @@ const ConversationList = ({ componentId }) => {
           }
         });
       }
+      console.log('No Conversation found with fragments...Trying to read query...');
+      const data = client.readQuery({ query: ConversationListQuery });
+      const { viewer } = data;
+      const { feed } = viewer;
+      const myConvo = feed.edges.find(node => {
+        return node.node.conversationId === messageCreated.conversationId;
+      });
+      if (myConvo && myConvo.node) {
+        myConvo.node.messages.edges.unshift({
+          node: {
+            __typename: 'Message',
+            id: messageCreated.id,
+            messageId: messageCreated.messageId,
+            senderId: messageCreated.senderId,
+            conversationId: convoId,
+            content: messageCreated.content,
+            created_at: messageCreated.created_at,
+            onFlight: false
+          },
+          cursor: messageCreated.id,
+          __typename: 'MessageEdge'
+        });
+      }
+
+      client.writeQuery({
+        query: ConversationListQuery,
+        data: {
+          ...data,
+          viewer: {
+            ...viewer,
+            feed: {
+              ...feed,
+              edges: [...feed.edges]
+            }
+          }
+        }
+      });
     }
   });
 
   useSubscription(ConversationCreated, {
-    onSubscriptionData: ({ client, subscriptionData }) => {
+    onSubscriptionData: async ({ client, subscriptionData }) => {
+      console.log('CONVERSATION_CREATED_SUBSCRIPTION');
       if (
         !subscriptionData.data ||
         !subscriptionData.data.conversationCreated
@@ -113,17 +162,35 @@ const ConversationList = ({ componentId }) => {
         return;
       }
       console.log(
-        'subscriptionData[conversationCreated]: ',
-        subscriptionData.data.conversationCreated.messages
+        'subscriptionData[conversationCreated] Id: ',
+        subscriptionData.data.conversationCreated.conversationId,
+        '[object]:',
+        subscriptionData.data.conversationCreated
       );
       const { conversationCreated } = subscriptionData.data;
       const data = client.readQuery({ query: ConversationListQuery });
       const { viewer } = data;
       const { feed } = viewer;
+      if (!feed.edges.length) {
+        feed.pageInfo = {
+          __typename: 'PageInfo',
+          hasNextPage: false,
+          hasPreviousPage: false
+        };
+      }
+      if (!conversationCreated.messages.pageInfo) {
+        conversationCreated.messages.pageInfo = {
+          __typename: 'PageInfo',
+          hasNextPage: false,
+          hasPreviousPage: false
+        };
+      }
       feed.edges.push({
         node: conversationCreated,
+        cursor: conversationCreated.conversationId,
         __typename: 'ConversationEdge'
       });
+
       client.writeQuery({
         query: ConversationListQuery,
         data: {
@@ -164,13 +231,8 @@ const ConversationList = ({ componentId }) => {
           refreshing={false}
           onEndReachedThreshold={0}
           onEndReached={async () => {
-            console.log('pageInfo: ', pageInfo);
             if (pageInfo.hasNextPage) {
               const lastConvoCursor = feedEdges[feedEdges.length - 1].cursor;
-              console.log(
-                '[onEndReached from ConversationList]: lastConvoCursor: ',
-                lastConvoCursor
-              );
               await fetchMore({
                 variables: {
                   first: 20,
@@ -241,7 +303,8 @@ export const ConversationListQuery = gql`
   ) {
     viewer {
       id
-      feed(first: $first, before: $cursor, order: $order) {
+      feed(first: $first, before: $cursor, order: $order)
+        @connection(key: "feed") {
         ...ConversationList_ConversationConnection
       }
     }

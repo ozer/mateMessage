@@ -67,7 +67,7 @@ const viewerType = new GraphQLObjectType({
           $and: [
             {
               recipients: {
-                $in: [user.id]
+                $in: [user._id]
               }
             }
           ]

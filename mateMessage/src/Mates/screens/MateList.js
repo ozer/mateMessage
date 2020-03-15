@@ -14,6 +14,7 @@ import MateRow from '../../UI/MateRow';
 import { CreateConversation } from '../../mutations/Message';
 import { ConversationListQuery } from '../../Conversations/screens/ConversationList';
 import { navigateToConversation } from '../../Conversations/navHelper';
+import { ConversationFragments } from '../../Conversations/screens/Conversation';
 
 const ZeroStateMateList = () => {
   return (
@@ -33,29 +34,52 @@ const MateList = ({ componentId }) => {
     { loading: createConversationLoading }
   ] = useMutation(CreateConversation, {
     update: async (cache, { data: { createConversation } }) => {
-      console.log('createConversation -> ', createConversation);
+      console.log('[createConversation]: ', createConversation);
       if (createConversation) {
         const { conversationId } = createConversation;
         const data = cache.readQuery({
-          query: ConversationListQuery
+          query: ConversationListQuery,
+          variables: {
+            first: 20,
+            order: -1,
+            messagesFirst: 10
+          }
         });
         const { viewer } = data;
         const convos = viewer.feed;
         if (
           convos.edges.findIndex(
-            item => item.node.conversationId !== conversationId
+            item => item.node.conversationId === conversationId
           ) < 0
         ) {
-          convos.edges.push({
+
+          console.log('convos!!', convos);
+          // cache.writeFragment({
+          //   id: createConversation.id,
+          //   data: createConversation,
+          //   fragment: ConversationFragments.paginatedConversation
+          // });
+
+          convos.edges.unshift({
             node: createConversation,
+            cursor: conversationId,
             __typename: 'ConversationEdge'
           });
-          cache.writeQuery({
+
+          return cache.writeQuery({
             query: ConversationListQuery,
+            variables: {
+              first: 20,
+              order: -1,
+              messagesFirst: 10
+            },
             data: {
               viewer: {
                 ...viewer,
-                feed: convos
+                feed: {
+                  ...viewer.feed,
+                  edges: [...convos.edges]
+                }
               }
             }
           });
@@ -148,7 +172,7 @@ const MateListQuery = gql`
   query MateListQuery {
     viewer {
       id
-      mates{
+      mates {
         pageInfo {
           hasNextPage
           hasPreviousPage

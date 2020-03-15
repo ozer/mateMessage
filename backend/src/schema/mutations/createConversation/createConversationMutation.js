@@ -1,8 +1,6 @@
 import { GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
-import {
-  sendConversationToRecipients,
-} from '../../subscriptions';
+import { sendConversationToRecipients } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
@@ -34,7 +32,7 @@ const resolve = async (_, args, context) => {
   newConversation = await newConversation
     .populate({
       path: 'recipients',
-      select: ['email', 'name']
+      select: ['email', 'name', 'username']
     })
     .execPopulate();
 
@@ -46,10 +44,31 @@ const resolve = async (_, args, context) => {
     id: newConversation.id,
     conversationId: newConversation.id,
     recipients: newConversation.recipients,
-    messages: []
+    messages: {
+      __typename: 'MessageConnection',
+      pageInfo: {
+        __typename: 'PageInfo',
+        hasPreviousPage: false,
+        hasNextPage: false
+      },
+      edges: []
+    }
   });
 
-  return newConversation;
+  return {
+    id: newConversation.id,
+    conversationId: newConversation.id,
+    recipients: newConversation.recipients,
+    messages: {
+      __typename: 'MessageConnection',
+      pageInfo: {
+        __typename: 'PageInfo',
+        hasPreviousPage: false,
+        hasNextPage: false
+      },
+      edges: []
+    }
+  };
 };
 
 export const createConversationMutation = {

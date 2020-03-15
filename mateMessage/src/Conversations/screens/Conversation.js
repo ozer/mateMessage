@@ -9,7 +9,7 @@ import { MessageRow } from '../../UI';
 import ConversationInput from '../containers/ConversationInput';
 
 const Conversation = ({ conversationId, componentId }) => {
-  // console.log('conversationNodeId: ', btoa(`Conversation:${conversationId}`));
+  console.log('conversationNodeId: ', btoa(`Conversation:${conversationId}`));
 
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const keyboardWillShow = event => {
@@ -39,14 +39,6 @@ const Conversation = ({ conversationId, componentId }) => {
       keyboardWillHide
     );
 
-    Navigation.mergeOptions(componentId, {
-      topBar: {
-        title: {
-          text: 'otherRecipient'
-        }
-      }
-    });
-
     return () => {
       keyboardWillShowEventListener.remove();
       keyboardWillHideEventListener.remove();
@@ -64,7 +56,7 @@ const Conversation = ({ conversationId, componentId }) => {
         }
       }
     `,
-    { fetchPolicy: 'cache-only', returnPartialData: true }
+    { fetchPolicy: 'cache-first', returnPartialData: true }
   );
 
   const {
@@ -73,7 +65,7 @@ const Conversation = ({ conversationId, componentId }) => {
     fetchMore
   } = useQuery(
     gql`
-      query Conversation(
+      query Conversation_Conversation(
         $id: ID!
         $messagesFirst: Int
         $messageCursor: Cursor
@@ -97,8 +89,22 @@ const Conversation = ({ conversationId, componentId }) => {
   );
 
   const userId = get(viewer, 'userId');
+  const recipients = get(node, 'recipients') || [];
   const pageInfo = get(node, 'messages.pageInfo') || {};
   const messageEdges = get(node, 'messages.edges') || [];
+
+  useEffect(() => {
+    if (recipients.length === 2) {
+      const other = recipients.find(recipient => recipient.userId !== userId);
+      Navigation.mergeOptions(componentId, {
+        topBar: {
+          title: {
+            text: other.name
+          }
+        }
+      });
+    }
+  }, [conversationId, componentId, recipients, userId]);
 
   const EmptyList = () => (
     <View>
@@ -196,14 +202,17 @@ export const ConversationFragments = {
       title
       recipients {
         id
+        userId
         name
       }
-      messages(first: $messagesFirst, order: -1, before: $messageCursor) {
+      messages(first: $messagesFirst, order: -1, before: $messageCursor)
+        @connection(key: "messages") {
         pageInfo {
           hasNextPage
           hasPreviousPage
         }
         edges {
+          __typename
           cursor
           node {
             id
@@ -227,14 +236,17 @@ export const ConversationFragments = {
       title
       recipients {
         id
+        userId
         name
       }
-      messages {
+      messages(first: 20, order: -1) @connection(key: "messages") {
         pageInfo {
           hasNextPage
           hasPreviousPage
         }
         edges {
+          __typename
+          cursor
           node {
             id
             messageId

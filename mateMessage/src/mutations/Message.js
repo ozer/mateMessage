@@ -8,9 +8,14 @@ export const CreateConversation = gql`
       title
       recipients {
         id
+        userId
         name
       }
       messages {
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+        }
         edges {
           node {
             id
@@ -18,7 +23,7 @@ export const CreateConversation = gql`
             senderId
             conversationId
             content
-            created_at  
+            created_at
           }
         }
       }
@@ -27,14 +32,22 @@ export const CreateConversation = gql`
 `;
 
 export const SendMessage = gql`
-  mutation SendMessage($content: String!, $conversationId: String!, $created: String!) {
-    sendMessage(content: $content, conversationId: $conversationId, created: $created) {
+  mutation SendMessage(
+    $content: String!
+    $conversationId: String!
+    $created: String!
+  ) {
+    sendMessage(
+      content: $content
+      conversationId: $conversationId
+      created: $created
+    ) {
       id
       messageId
       conversationId
       senderId
       content
-      created_at  
+      created_at
       __typename
     }
   }
