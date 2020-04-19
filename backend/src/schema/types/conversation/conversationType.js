@@ -42,7 +42,6 @@ const conversationType = new GraphQLObjectType({
           return null;
         }
         const convoId = parent._id ? parent._id : parent.id;
-        console.log('convoId: ', convoId);
         const queryParams = {
           $and: [
             {
@@ -59,15 +58,9 @@ const conversationType = new GraphQLObjectType({
         if (!context.user) {
           return null;
         }
-        // Need to figure it out why it didn't work!
-        // const { userLoader } = context;
-        // const recipients = await userLoader.loadMany(parent.recipients);
 
-        const recipients = [];
-        for (const recipient of parent.recipients) {
-          const foundRecipient = await User.findById(recipient);
-          recipients.push(foundRecipient);
-        }
+        const { userLoader } = context;
+        const recipients = await userLoader.loadMany(parent.recipients);
 
         return recipients;
       }

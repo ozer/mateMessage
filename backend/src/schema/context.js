@@ -1,6 +1,6 @@
 import { validateToken } from '../helpers/Authenticator';
 import User from '../db/models/User';
-import { getuserLoader } from '../dataloaders/userLoader';
+import { userLoader } from '../dataloaders/userLoader';
 
 export const buildContext = ({ req, connection }) => {
   if (connection) {
@@ -18,7 +18,7 @@ export const buildContext = ({ req, connection }) => {
               return {
                 state: true,
                 user,
-                userLoader: getuserLoader()
+                userLoader: userLoader
               };
             }
           });
@@ -28,6 +28,5 @@ export const buildContext = ({ req, connection }) => {
     }
     return { state: false, user: null };
   }
-  console.log('The request do not have a token!');
   return { state: false, user: null };
 };
