@@ -7,7 +7,6 @@ import userType from '../user/userType';
 import messageConnectionType from '../message/messageConnectionType';
 import { createConnectionArguments } from '../../../db/helpers/pagination';
 import { findMessages } from '../message/messageMongoHelper';
-import User from '../../../db/models/User';
 
 const conversationType = new GraphQLObjectType({
   name: 'Conversation',

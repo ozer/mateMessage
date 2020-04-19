@@ -4,9 +4,7 @@ import { sendConversationToRecipients } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
-  console.log('createConversationMutation!');
   if (!context.user) {
-    console.log('No Context');
     return null;
   }
   const { user } = context;

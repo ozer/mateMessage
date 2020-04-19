@@ -47,7 +47,6 @@ export const applyPagination = async ({
 
   if (first || last) {
     count = await cloneQuery(modelName, queryParams).countDocuments();
-    console.log(`[${modelName}]: [count] -> ${count}`);
     let limit;
     let skip;
 

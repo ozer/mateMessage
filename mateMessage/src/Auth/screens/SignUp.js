@@ -30,7 +30,6 @@ const SignUp = ({ componentId }) => {
         body: JSON.stringify({ username, password, email, name })
       }).then(res => res.json());
 
-      console.log('response: ', response);
       if (response) {
         const { user } = response;
         const { jwt: token } = user;

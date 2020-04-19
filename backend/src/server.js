@@ -53,7 +53,6 @@ export const initializeServer = async () => {
     subscriptions: {
       path: '/api/graphql',
       onConnect: (connectionParams, webSocket) => {
-        console.log('onConnect: ', connectionParams);
         if (connectionParams.authToken) {
           const { authToken } = connectionParams;
           return validateToken(authToken)

@@ -68,7 +68,6 @@ router.post('/signIn', async (request, response) => {
     }
     return response.json('Missing Credentials').status(400);
   } catch (e) {
-    console.log(e);
     return response.json('Internal Server Error').status(500);
   }
 });

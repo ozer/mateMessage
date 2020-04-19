@@ -26,8 +26,6 @@ const SignIn = ({ componentId }) => {
         },
         body: JSON.stringify({ username, password })
       }).then(res => res.json());
-
-      console.log('response: ', response);
       if (response) {
         const { user } = response;
         const { jwt: token } = user;

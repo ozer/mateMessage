@@ -8,7 +8,6 @@ const wsLink = new WebSocketLink({
       console.log('Connection callback!');
     },
     connectionParams: async () => {
-      console.log('callback of connectionParams');
       const token = await AsyncStorage.getItem('token', null);
       return {
         authToken: token
@@ -18,21 +17,6 @@ const wsLink = new WebSocketLink({
     reconnectionAttempts: 10,
     timeout: 2500
   },
-  onDisconnected: function(event) {
-    console.log('event');
-  },
-  on: eventName => {
-    console.log('eventName ->', eventName);
-  },
-  onConnecting: event => {
-    console.log('onConnecting', event);
-  },
-  onConnected: event => {
-    console.log('onConnected!', event);
-  },
-  onReconnecting: event => {
-    console.log('onReconnecting!', event);
-  }
 });
 
 export const wsClient = wsLink.subscriptionClient;

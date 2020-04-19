@@ -16,11 +16,10 @@ const styles = StyleSheet.create({
 const SplashScreen = ({ componentId }) => {
   useQuery(Viewer, {
     onCompleted: async ({ viewer }) => {
-      console.log('onCompleted', viewer);
       if (viewer) {
         return goHome();
       }
-      auth();
+      return auth();
     },
     onError: (e) => {
       console.log('e', e);

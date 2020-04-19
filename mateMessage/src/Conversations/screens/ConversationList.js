@@ -67,19 +67,10 @@ const ConversationList = ({ componentId }) => {
       const { messageCreated } = subscriptionData.data;
       const convoId = messageCreated.conversationId;
       const encodedConversationId = btoa(`Conversation:${convoId}`);
-      console.log(
-        'searching Fragment with conversationNodeId: ',
-        encodedConversationId
-      );
       const convo = client.readFragment({
         fragment: ConversationFragments.conversation,
         id: encodedConversationId
       });
-
-      console.log(
-        'messageContent: ',
-        subscriptionData.data.messageCreated.content
-      );
 
       if (
         convo &&
@@ -161,16 +152,13 @@ const ConversationList = ({ componentId }) => {
       ) {
         return;
       }
-      console.log(
-        'subscriptionData[conversationCreated] Id: ',
-        subscriptionData.data.conversationCreated.conversationId,
-        '[object]:',
-        subscriptionData.data.conversationCreated
-      );
       const { conversationCreated } = subscriptionData.data;
       const data = client.readQuery({ query: ConversationListQuery });
       const { viewer } = data;
       const { feed } = viewer;
+
+      // Handle the case that the user does not have any convos.
+      // So we add default pageInfo type to feed.
       if (!feed.edges.length) {
         feed.pageInfo = {
           __typename: 'PageInfo',

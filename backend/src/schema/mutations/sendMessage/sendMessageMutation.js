@@ -43,7 +43,6 @@ export const sendMessageMutation = {
   resolve: async (_, args, context) => {
     await delay();
     if (!context.user) {
-      console.log('No Context!');
       return null;
     }
     const { user } = context;
@@ -51,7 +50,6 @@ export const sendMessageMutation = {
     const conversation = await Conversation.findById(conversationId).populate({
       path: 'recipients',
       select: ['email', 'name']
-      // match: { id: { $ne: user.id } }
     });
     if (!conversation) {
       return null;

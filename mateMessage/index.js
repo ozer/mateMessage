@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigation } from 'react-native-navigation';
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import SplashScreen from './src/SplashScreen';
 import { registerScreens } from './screens';
 import { cachePersistor } from './src/apollo/cache';
@@ -19,6 +20,7 @@ const startApp = async () => {
   });
   await NetInfo.fetch();
   await Icon.loadFont();
+  await MaterialIcon.loadFont();
   moment.locale('en');
   await cachePersistor.restore();
   return Navigation.events().registerAppLaunchedListener(() => {

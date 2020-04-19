@@ -10,6 +10,7 @@ import { encode as btoa } from 'base-64';
 import { useMutation, useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import get from 'lodash.get';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { SendMessage } from '../../mutations/Message';
 import { Viewer } from '../../queries/Viewer';
 
@@ -41,9 +42,6 @@ const ConversationInput = ({ conversationId }) => {
     },
     update: (cache, { data }) => {
       const isOptimistic = data.sendMessage.isOptimistic;
-      if (!isOptimistic) {
-        console.log('data.sendMessage: ', data.sendMessage);
-      }
       const encodedConversationId = btoa(`Conversation:${conversationId}`);
 
       const convo = cache.readFragment({
@@ -84,7 +82,6 @@ const ConversationInput = ({ conversationId }) => {
         `
       });
 
-      console.log('building newMessage node');
       const newMessage = {
         __typename: 'MessageEdge',
         cursor: data.sendMessage.id,
@@ -163,7 +160,11 @@ const ConversationInput = ({ conversationId }) => {
         style={styles.input}
       />
       <TouchableOpacity disabled={!content} onPress={onPressSend}>
-        <Text>Send</Text>
+        <MaterialIcon
+          style={{ ...styles.send, color: 'blue' }}
+          name="send"
+          size={20}
+        />
       </TouchableOpacity>
     </View>
   );

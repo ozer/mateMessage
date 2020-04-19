@@ -61,11 +61,8 @@ export const sendConversationToRecipients = ({
   messages,
   recipients
 }) => {
-  console.log('sendConversationToRecipients', recipients);
-  console.log('senderId: ', senderId);
   for (const recipient of recipients) {
     if (senderId !== recipient.id) {
-      console.log('publishing conversation ', id);
       publishConversation({
         id,
         conversationId,
@@ -103,15 +100,13 @@ export const publishConversation = ({
   id,
   conversationId,
   recipients,
-  messages,
-  title,
+  title = '',
   recipientId
 }) => {
-  console.log('recipients: ', recipients);
   return pubSub.publish(`${recipientId}:${CONVERSATION_TOPIC}`, {
     conversationCreated: {
       id,
-      title: '',
+      title,
       avatar: '',
       created_at: '',
       conversationId,
@@ -139,7 +134,6 @@ const subscriptions = new GraphQLObjectType({
           return null;
         }
         const { user } = context;
-        console.log('Subscribing to conversationCreated -> ', user.id);
         const subscriptionPath = `${user.id}:${CONVERSATION_TOPIC}`;
         return pubSub.asyncIterator([subscriptionPath]);
       }
@@ -151,7 +145,6 @@ const subscriptions = new GraphQLObjectType({
           return null;
         }
         const { user } = context;
-        console.log('Subscribing to messageCreated -> ', user.id);
         const subscriptionPath = `${user.id}:${MESSAGE_TOPIC}`;
         return pubSub.asyncIterator([subscriptionPath]);
       }

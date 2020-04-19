@@ -4,9 +4,7 @@ import { sendMessageToRecipients } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
-  console.log('createGroupConversationMutation!');
   if (!context.user) {
-    console.log('No Context');
     return null;
   }
   const { user } = context;
@@ -25,10 +23,6 @@ const resolve = async (_, args, context) => {
       select: ['email', 'name']
     })
     .execPopulate();
-  // newConversation.forEach(convo => {
-  //   const meIdx = convo.recipients.findIndex(r => r.id === user.id);
-  //   convo.recipients.splice(meIdx, 1);
-  // });
   sendMessageToRecipients({
     recipients: newConversation.recipients,
     senderId: user.id,

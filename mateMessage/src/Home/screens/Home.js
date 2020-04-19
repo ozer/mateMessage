@@ -14,7 +14,6 @@ const Home = () => {
   useEffect(() => {
     const getToken = async () => {
       const token = await AsyncStorage.getItem('token');
-      console.log('token: ', token);
     };
 
     getToken();

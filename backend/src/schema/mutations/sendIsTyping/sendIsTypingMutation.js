@@ -9,9 +9,7 @@ import Message from '../../../db/models/Message';
 import { sendIsTypingToRecipients } from '../../subscriptions';
 
 export const resolve = async (_, args, context) => {
-  console.log('sendIsTypingMutation!');
   if (!context.user) {
-    console.log('No Context!');
     return null;
   }
   const { user } = context;
@@ -25,7 +23,6 @@ export const resolve = async (_, args, context) => {
   if (!conversation) {
     return null;
   }
-  console.log('conversation in sendIsTypingMutation -> ', conversation.id);
 
   sendIsTypingToRecipients({
     isTyping,

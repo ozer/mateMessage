@@ -151,15 +151,9 @@ const Conversation = ({ conversationId, componentId }) => {
         renderItem={renderItem}
         onEndReachedThreshold={0}
         onEndReached={async () => {
-          console.log('[pageInfo]: ', pageInfo);
-          console.log('[messageCount]: ', messageEdges.length);
           const lastMessage = messageEdges[messageEdges.length - 1];
           if (pageInfo.hasNextPage) {
             const lastMessageCursor = lastMessage.cursor;
-            console.log(
-              '[onEndReached from MessageList in Conversation]: lastMessageCursor: ',
-              lastMessageCursor
-            );
             await fetchMore({
               variables: {
                 messageCursor: lastMessageCursor,

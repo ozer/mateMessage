@@ -14,7 +14,6 @@ export const cache = new InMemoryCache({
   cacheRedirects: {
     Query: {
       node: (_, args, { getCacheKey }) => {
-        console.log('args: ', args);
         const { id } = args;
         const decoded = decode(id);
         const [type] = decoded.split(':');
