@@ -1,6 +1,6 @@
 import { GraphQLList, GraphQLString } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
-import { sendMessageToRecipients } from '../../subscriptions';
+import { sendConversationToRecipients } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
 
 const resolve = async (_, args, context) => {
@@ -23,11 +23,24 @@ const resolve = async (_, args, context) => {
       select: ['email', 'name']
     })
     .execPopulate();
-  sendMessageToRecipients({
-    recipients: newConversation.recipients,
+
+  sendConversationToRecipients({
+    id: newConversation.id,
+    conversationId: newConversation.id,
     senderId: user.id,
-    conversationId: newConversation.id
+    recipients: newConversation.recipients,
+    createdAt: new Date(newConversation.created_at).getTime().toString(),
+    messages: {
+      __typename: 'MessageConnection',
+      pageInfo: {
+        __typename: 'PageInfo',
+        hasPreviousPage: false,
+        hasNextPage: false
+      },
+      edges: []
+    }
   });
+
   return result;
 };
 

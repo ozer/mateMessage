@@ -57,7 +57,7 @@ export const sendMessageMutation = {
     const newMessage = new Message();
     newMessage.content = content;
     newMessage.senderId = user.id;
-    newMessage.created_at = created;
+    newMessage.created_at = created || new Date();
     newMessage.conversationId = conversation.id;
     await newMessage.save();
 

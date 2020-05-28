@@ -47,7 +47,7 @@ const ConversationList = ({ componentId }) => {
     variables: {
       first: 20,
       order: -1,
-      messagesFirst: 10
+      messagesFirst: 20
     },
     fetchPolicy: 'cache-and-network',
     onError: e => {

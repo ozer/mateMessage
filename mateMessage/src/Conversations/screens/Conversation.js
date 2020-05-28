@@ -81,6 +81,7 @@ const Conversation = ({ conversationId, componentId }) => {
     `,
     {
       fetchPolicy: 'cache-first',
+      returnPartialData: true,
       variables: {
         id: btoa(`Conversation:${conversationId}`),
         messagesFirst: 20
