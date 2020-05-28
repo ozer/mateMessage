@@ -31,8 +31,9 @@ const SignUp = ({ componentId }) => {
       }).then(res => res.json());
 
       if (response) {
+        console.log('response: ', response);
         const { user } = response;
-        const { jwt: token } = user;
+        const { token } = user;
         await handleAuthFormSubmit({ token });
         setLoading(false);
         return goHome();
@@ -40,6 +41,7 @@ const SignUp = ({ componentId }) => {
       setLoading(false);
     } catch (e) {
       setLoading(false);
+      console.log('exception: ', e);
       Alert.alert(e);
     }
   }, [username, password]);

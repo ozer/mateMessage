@@ -12,8 +12,8 @@ import { goHome } from '../../../navigation';
 import { handleAuthFormSubmit } from '../authHelper';
 
 const SignIn = ({ componentId }) => {
-  const [username, setUsername] = useState('ozer');
-  const [password, setPassword] = useState('123456');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = useCallback(async () => {
