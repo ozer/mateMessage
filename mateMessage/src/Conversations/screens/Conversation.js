@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, FlatList, Keyboard, Text, View } from 'react-native';
 import { Navigation } from 'react-native-navigation';
-import { useApolloClient, useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import { encode as btoa } from 'base-64';
 import get from 'lodash.get';

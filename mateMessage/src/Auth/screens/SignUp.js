@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { Navigation } from 'react-native-navigation';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { Navigation } from 'react-native-navigation';
 import { goHome } from '../../../navigation';
 import { handleAuthFormSubmit } from '../authHelper';
 
@@ -189,8 +189,8 @@ const SignUp = ({ componentId }) => {
 SignUp.options = () => ({
   topBar: {
     visible: false,
-    drawBehind: true,
-  },
+    drawBehind: true
+  }
 });
 
 export default SignUp;

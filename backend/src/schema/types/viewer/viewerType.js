@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLString, GraphQLInt } from 'graphql';
 import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
@@ -7,10 +7,7 @@ import { findConversations } from '../conversation/conversationMongoHelper';
 import { createConnectionArguments } from '../../../db/helpers/pagination';
 import userConnectionType from '../user/userConnectionType';
 import { findUsers } from '../user/userMongoHelper';
-
-const getConversation = obj => {
-  return obj;
-};
+import Message from '../../../db/models/Message';
 
 const viewerType = new GraphQLObjectType({
   name: 'Viewer',
@@ -36,6 +33,18 @@ const viewerType = new GraphQLObjectType({
     },
     avatar: {
       type: GraphQLString
+    },
+    messageCount: {
+      type: GraphQLInt,
+      resolve: async (_, args, context) => {
+        if (!context.user) {
+          return null;
+        }
+
+        return Message.find({
+          senderId: context.user.id
+        }).countDocuments();
+      }
     },
     mates: {
       type: userConnectionType,

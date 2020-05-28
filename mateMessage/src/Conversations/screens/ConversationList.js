@@ -5,6 +5,7 @@ import gql from 'graphql-tag';
 import get from 'lodash.get';
 import { encode as btoa } from 'base-64';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { ThemeProvider } from 'emotion-theming';
 import {
   ConversationCreated,
   MessageCreated
@@ -18,7 +19,6 @@ import { ConversationFragments } from './Conversation';
 import { navigateToConversation } from '../navHelper';
 import NetworkStatusBar from '../../UI/NetworkStatusBar';
 import { theme } from '../../theme/theme';
-import { ThemeProvider } from 'emotion-theming';
 
 const ConversationListZeroStateComponent = () => {
   return (
