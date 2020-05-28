@@ -2,7 +2,6 @@ import { GraphQLObjectType, GraphQLString, GraphQLList } from 'graphql';
 import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from '../node/nodeDefinition';
 import { idMapping } from '../../../helpers/mapping';
-import Conversation from '../../../db/models/Conversation';
 import userType from '../user/userType';
 import messageConnectionType from '../message/messageConnectionType';
 import { createConnectionArguments } from '../../../db/helpers/pagination';
@@ -23,9 +22,6 @@ const conversationType = new GraphQLObjectType({
     },
     title: {
       type: GraphQLString,
-      resolve: (parent, _, context) => {
-        return parent.title;
-      }
     },
     avatar: {
       type: GraphQLString
@@ -36,10 +32,11 @@ const conversationType = new GraphQLObjectType({
     messages: {
       type: messageConnectionType,
       args: createConnectionArguments(),
-      resolve: (parent, args, context) => {
+      resolve: async (parent, args, context) => {
         if (!context.user) {
           return null;
         }
+
         const convoId = parent._id ? parent._id : parent.id;
         const queryParams = {
           $and: [
@@ -48,6 +45,7 @@ const conversationType = new GraphQLObjectType({
             }
           ]
         };
+
         return findMessages(args, queryParams);
       }
     },
@@ -59,7 +57,9 @@ const conversationType = new GraphQLObjectType({
         }
 
         const { userLoader } = context;
-        const recipients = await userLoader.loadMany(parent.recipients);
+        const recipients = await userLoader.loadMany(
+          parent.recipients.map(recipient => recipient._id.toString())
+        );
 
         return recipients;
       }

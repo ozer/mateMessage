@@ -1,5 +1,10 @@
 import { PubSub } from 'apollo-server-express';
-import { GraphQLObjectType, GraphQLString, GraphQLBoolean } from 'graphql';
+import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLBoolean,
+  GraphQLNonNull
+} from 'graphql';
 import messageType from '../types/message/messageType';
 import conversationType from '../types/conversation/conversationType';
 const pubSub = new PubSub();
@@ -58,16 +63,15 @@ export const sendConversationToRecipients = ({
   conversationId,
   senderId,
   title,
-  messages,
-  recipients
+  recipients,
+  created_at
 }) => {
   for (const recipient of recipients) {
-    if (senderId !== recipient.id) {
+    if (true) {
       publishConversation({
         id,
-        conversationId,
-        messages,
         recipients,
+        created_at,
         title,
         recipientId: recipient.id
       });
@@ -96,20 +100,19 @@ export const publishMessage = ({
   });
 };
 
-export const publishConversation = ({
+export const publishConversation = async ({
   id,
-  conversationId,
   recipients,
   title = '',
-  recipientId
+  recipientId,
+  created_at
 }) => {
-  return pubSub.publish(`${recipientId}:${CONVERSATION_TOPIC}`, {
-    conversationCreated: {
+  const subscriptionPath = `${recipientId}:${CONVERSATION_TOPIC}`;
+  return pubSub.publish(subscriptionPath, {
+    convoCreated: {
       id,
       title,
-      avatar: '',
-      created_at: '',
-      conversationId,
+      created_at,
       recipients,
       messages: {
         __typename: 'MessageConnection',
@@ -127,15 +130,20 @@ export const publishConversation = ({
 const subscriptions = new GraphQLObjectType({
   name: 'subscription',
   fields: {
-    conversationCreated: {
-      type: conversationType,
+    convoCreated: {
+      type: new GraphQLNonNull(conversationType),
       subscribe: (params, {}, context) => {
         if (!context.user) {
           return null;
         }
         const { user } = context;
         const subscriptionPath = `${user.id}:${CONVERSATION_TOPIC}`;
-        return pubSub.asyncIterator([subscriptionPath]);
+        console.log(
+          'subscriptionPath from convoCreated: ',
+          subscriptionPath,
+          user.name
+        );
+        return pubSub.asyncIterator(subscriptionPath);
       }
     },
     messageCreated: {
@@ -146,7 +154,7 @@ const subscriptions = new GraphQLObjectType({
         }
         const { user } = context;
         const subscriptionPath = `${user.id}:${MESSAGE_TOPIC}`;
-        return pubSub.asyncIterator([subscriptionPath]);
+        return pubSub.asyncIterator(subscriptionPath);
       }
     },
     isTyping: {

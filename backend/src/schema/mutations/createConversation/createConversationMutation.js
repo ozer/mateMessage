@@ -1,4 +1,4 @@
-import { GraphQLString } from 'graphql';
+import { GraphQLString, GraphQLNonNull } from 'graphql';
 import Conversation from '../../../db/models/Conversation';
 import { sendConversationToRecipients } from '../../subscriptions';
 import conversationType from '../../types/conversation/conversationType';
@@ -41,7 +41,9 @@ const resolve = async (_, args, context) => {
   sendConversationToRecipients({
     id: newConversation.id,
     conversationId: newConversation.id,
+    senderId: user.id,
     recipients: newConversation.recipients,
+    createdAt: new Date(newConversation.created_at).getTime().toString(),
     messages: {
       __typename: 'MessageConnection',
       pageInfo: {
@@ -72,7 +74,7 @@ const resolve = async (_, args, context) => {
 export const createConversationMutation = {
   type: conversationType,
   args: {
-    recipientId: { type: GraphQLString, required: true }
+    recipientId: { type: new GraphQLNonNull(GraphQLString), required: true }
   },
   resolve
 };

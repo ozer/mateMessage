@@ -12,6 +12,7 @@ import restAPI from './routes';
 import schema from './schema';
 import { validateToken } from './helpers/Authenticator';
 import { buildContext } from './schema/context';
+import { userLoader } from './dataloaders/userLoader';
 
 const PORT = 4000;
 
@@ -61,7 +62,8 @@ export const initializeServer = async () => {
                 return User.findById(result.id, { password: 0 }).then(user => {
                   if (user) {
                     return {
-                      user
+                      user,
+                      userLoader: userLoader
                     };
                   }
                   return webSocket.close();

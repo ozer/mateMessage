@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, ActionSheetIOS } from 'react-native';
+import { View, Text, FlatList, ActionSheetIOS, Alert } from 'react-native';
 import {
   ActionSheetProvider,
   useActionSheet
 } from '@expo/react-native-action-sheet';
 import gql from 'graphql-tag';
-import { useMutation, useQuery } from '@apollo/react-hooks';
+import { useMutation, useQuery, useSubscription } from '@apollo/react-hooks';
 import { Navigation } from 'react-native-navigation';
 import { ThemeProvider } from 'emotion-theming';
 import get from 'lodash.get';
@@ -14,6 +14,7 @@ import MateRow from '../../UI/MateRow';
 import { CreateConversation } from '../../mutations/Message';
 import { ConversationListQuery } from '../../Conversations/screens/ConversationList';
 import { navigateToConversation } from '../../Conversations/navHelper';
+import { ConversationCreated } from '../../subscriptions/Message';
 
 const ZeroStateMateList = () => {
   return (
@@ -32,50 +33,58 @@ const MateList = ({ componentId }) => {
     createConversation,
     { loading: createConversationLoading }
   ] = useMutation(CreateConversation, {
+    onError: error => {
+      console.log('Error on createConversation: ', error);
+      return Alert.alert('Unfortunately, Something went wrong! Check logs m8');
+    },
     update: async (cache, { data: { createConversation } }) => {
-      if (createConversation) {
-        const { conversationId } = createConversation;
-        const data = cache.readQuery({
-          query: ConversationListQuery,
-          variables: {
-            first: 20,
-            order: -1,
-            messagesFirst: 10
-          }
-        });
-        const { viewer } = data;
-        const convos = viewer.feed;
-        if (
-          convos.edges.findIndex(
-            item => item.node.conversationId === conversationId
-          ) < 0
-        ) {
-          convos.edges.unshift({
-            node: createConversation,
-            cursor: conversationId,
-            __typename: 'ConversationEdge'
-          });
-
-          return cache.writeQuery({
+      try {
+        if (createConversation) {
+          const { conversationId } = createConversation;
+          const data = cache.readQuery({
             query: ConversationListQuery,
             variables: {
               first: 20,
               order: -1,
               messagesFirst: 10
-            },
-            data: {
-              viewer: {
-                ...viewer,
-                feed: {
-                  ...viewer.feed,
-                  edges: [...convos.edges]
-                }
-              }
             }
           });
-        }
+          const { viewer } = data;
+          const convos = viewer.feed;
+          if (
+            convos.edges.findIndex(
+              item => item.node.conversationId === conversationId
+            ) < 0
+          ) {
+            convos.edges.unshift({
+              node: createConversation,
+              cursor: conversationId,
+              __typename: 'ConversationEdge'
+            });
 
-        await navigateToConversation({ componentId, conversationId });
+            cache.writeQuery({
+              query: ConversationListQuery,
+              variables: {
+                first: 20,
+                order: -1,
+                messagesFirst: 10
+              },
+              data: {
+                viewer: {
+                  ...viewer,
+                  feed: {
+                    ...viewer.feed,
+                    edges: [...convos.edges]
+                  }
+                }
+              }
+            });
+          }
+
+          await navigateToConversation({ componentId, conversationId });
+        }
+      } catch (exception) {
+        console.log('exception: ', exception);
       }
     }
   });
@@ -100,7 +109,7 @@ const MateList = ({ componentId }) => {
           cancelButtonIndex: 1
         },
         async buttonIndex => {
-          if (!buttonIndex) {
+          if (!buttonIndex && mate) {
             await createConversation({ variables: { recipientId: mate } });
           }
         }

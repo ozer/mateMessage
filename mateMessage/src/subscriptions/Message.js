@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 
 export const ConversationCreated = gql`
   subscription ConversationCreated {
-    conversationCreated {
+    convoCreated {
       id
       conversationId
       title
@@ -12,15 +12,14 @@ export const ConversationCreated = gql`
         name
       }
       messages {
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+        }
         edges {
+          cursor
           node {
             id
-            messageId
-            conversationId
-            senderId
-            content
-            created_at
-            onFlight @client
           }
         }
       }

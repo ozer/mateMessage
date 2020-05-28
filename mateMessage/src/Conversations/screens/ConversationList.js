@@ -57,9 +57,51 @@ const ConversationList = ({ componentId }) => {
   const feedEdges = get(viewer, 'feed.edges');
   const pageInfo = get(viewer, 'feed.pageInfo');
 
+  useSubscription(ConversationCreated, {
+    variables: {},
+    onSubscriptionData: ({ client, subscriptionData }) => {
+      console.log('[Subscription]: convoCreated', subscriptionData.data);
+      if (
+        !subscriptionData.data ||
+        !subscriptionData.data.convoCreated
+      ) {
+        return;
+      }
+      const { convoCreated } = subscriptionData.data;
+      const data = client.readQuery({ query: ConversationListQuery });
+      const { viewer } = data;
+      const { feed } = viewer;
+
+      // Handle the case that the user does not have any convos.
+      // So we add default pageInfo type to feed.
+      if (!feed.edges.length) {
+        feed.pageInfo = {
+          __typename: 'PageInfo',
+          hasNextPage: false,
+          hasPreviousPage: false
+        };
+      }
+      feed.edges.push({
+        node: convoCreated,
+        cursor: convoCreated.conversationId,
+        __typename: 'ConversationEdge'
+      });
+
+      client.writeQuery({
+        query: ConversationListQuery,
+        data: {
+          viewer: {
+            ...viewer,
+            feed
+          }
+        }
+      });
+    }
+  });
+
   useSubscription(MessageCreated, {
     onSubscriptionData: ({ client, subscriptionData }) => {
-      console.log('[Subscription]: messageCreated');
+      console.log('[Subscription]: messageCreated', subscriptionData.data);
       if (!subscriptionData.data || !subscriptionData.data.messageCreated) {
         return;
       }
@@ -103,14 +145,19 @@ const ConversationList = ({ componentId }) => {
           }
         });
       }
-      console.log('No Conversation found with fragments...Trying to read query...');
+      console.log(
+        'No Conversations found with fragments...Trying to read query...'
+      );
+
       const data = client.readQuery({ query: ConversationListQuery });
       const { viewer } = data;
       const { feed } = viewer;
       const myConvo = feed.edges.find(node => {
         return node.node.conversationId === messageCreated.conversationId;
       });
+
       if (myConvo && myConvo.node) {
+        console.log('Conversation found using readQuery!');
         myConvo.node.messages.edges.unshift({
           node: {
             __typename: 'Message',
@@ -125,72 +172,23 @@ const ConversationList = ({ componentId }) => {
           cursor: messageCreated.id,
           __typename: 'MessageEdge'
         });
-      }
 
-      client.writeQuery({
-        query: ConversationListQuery,
-        data: {
-          ...data,
-          viewer: {
-            ...viewer,
-            feed: {
-              ...feed,
-              edges: [...feed.edges]
+        return client.writeQuery({
+          query: ConversationListQuery,
+          data: {
+            ...data,
+            viewer: {
+              ...viewer,
+              feed: {
+                ...feed,
+                edges: [...feed.edges]
+              }
             }
           }
-        }
-      });
+        });
+      }
     }
   });
-
-  useSubscription(ConversationCreated, {
-    onSubscriptionData: async ({ client, subscriptionData }) => {
-      console.log('CONVERSATION_CREATED_SUBSCRIPTION');
-      if (
-        !subscriptionData.data ||
-        !subscriptionData.data.conversationCreated
-      ) {
-        return;
-      }
-      const { conversationCreated } = subscriptionData.data;
-      const data = client.readQuery({ query: ConversationListQuery });
-      const { viewer } = data;
-      const { feed } = viewer;
-
-      // Handle the case that the user does not have any convos.
-      // So we add default pageInfo type to feed.
-      if (!feed.edges.length) {
-        feed.pageInfo = {
-          __typename: 'PageInfo',
-          hasNextPage: false,
-          hasPreviousPage: false
-        };
-      }
-      if (!conversationCreated.messages.pageInfo) {
-        conversationCreated.messages.pageInfo = {
-          __typename: 'PageInfo',
-          hasNextPage: false,
-          hasPreviousPage: false
-        };
-      }
-      feed.edges.push({
-        node: conversationCreated,
-        cursor: conversationCreated.conversationId,
-        __typename: 'ConversationEdge'
-      });
-
-      client.writeQuery({
-        query: ConversationListQuery,
-        data: {
-          viewer: {
-            ...viewer,
-            feed
-          }
-        }
-      });
-    }
-  });
-
   const renderItem = ({ item: { node } }) => {
     const conversationId = get(node, 'conversationId') || '';
     const title = get(node, 'title') || '';
