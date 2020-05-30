@@ -80,7 +80,7 @@ const Conversation = ({ conversationId, componentId }) => {
       ${ConversationFragments.paginatedConversation}
     `,
     {
-      fetchPolicy: 'cache-first',
+      fetchPolicy: 'cache-and-network',
       returnPartialData: true,
       variables: {
         id: btoa(`Conversation:${conversationId}`),

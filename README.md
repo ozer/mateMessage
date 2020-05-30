@@ -3,6 +3,8 @@
 # mateMessage 😎
 ## Messaging application built with GraphQL and React Native
 
+## https://youtu.be/D5wuccPIH7c
+
 ## Tech Stack
 * Node Graph API using Apollo Server with **Relay Definitions and Connections**.
 * MongoDB
@@ -19,8 +21,6 @@
 * Offline Message Sending and Sync when the app is back online(Without killing the app for now :) ).
 * React & Apollo Hooks.
 * Nice examples of React Native Navigation library.
-
-#### Soon, there will be a video.
 
 #### I focused mostly on making this app work and see how this tech stack dances in a harmony.
 #### I'll try to add as many tests as when I have time for it.
