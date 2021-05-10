@@ -23,7 +23,7 @@
     "graphql-relay": "0.6.0",
     "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "mongoose": "5.8.1",
     "subscriptions-transport-ws": "^0.9.15",
     "uuid": "^3.3.2"
